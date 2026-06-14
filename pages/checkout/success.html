@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forge    Dominance | Forge    Dominance</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=IBM+Plex+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/colors.css">
+  <link rel="stylesheet" href="../../assets/css/shared.css">
+  <link rel="stylesheet" href="../../assets/css/checkout.css">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/favicon.svg">
+</head>
+<body class="checkout-page">
+  <nav class="checkout-nav">
+    <a href="../../index.html" class="nav-logo">FORGE<span>DOMINANCE</span></a>
+    <div class="checkout-steps">
+      <span class="step done">1. Cart</span>
+      <span class="step-divider done"></span>
+      <span class="step done">2. Checkout</span>
+      <span class="step-divider done"></span>
+      <span class="step active">3. Confirmation</span>
+    </div>
+  </nav>
+
+  <main class="checkout-main">
+    <section class="checkout-container checkout-success">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="var(--ember, #e85d04)" stroke-width="2"/>
+          <path d="M20 32l8 8 16-16" stroke="var(--ember, #e85d04)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Order Confirmed</h1>
+      <p class="success-message">Thank you for your purchase. Your order has been successfully placed.</p>
+
+      <div class="success-details" id="orderDetails">
+        <div class="detail-row">
+          <span>Order Status</span>
+          <span id="orderStatus">Confirmed</span>
+        </div>
+        <div class="detail-row">
+          <span>Email</span>
+          <span id="orderEmail">--</span>
+        </div>
+        <div class="detail-row">
+          <span>Amount Paid</span>
+          <span id="orderAmount">--</span>
+        </div>
+      </div>
+
+      <p class="success-note">You will receive a confirmation email shortly. Our team will contact you within 2 hours to discuss specifications and delivery timeline.</p>
+
+      <div class="success-actions">
+        <a href="../../index.html" class="btn-primary">Return Home</a>
+        <a href="../collection.html" class="btn-secondary">Continue Shopping</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="checkout-footer">
+    <p>&copy; 2026 Forge Dominance. Secure checkout powered by Stripe.</p>
+  </footer>
+
+  <script src="../../assets/js/site-settings.js"></script>
+  <script>
+    const CART_KEY = 'bs_checkout_cart';
+
+    async function loadOrderDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch('/api/stripe/checkout/session/' + encodeURIComponent(sessionId));
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.customerEmail) {
+          document.getElementById('orderEmail').textContent = data.customerEmail;
+        }
+        if (data.amountTotal) {
+          const amount = (data.amountTotal / 100).toFixed(2);
+          const currency = (data.currency || 'usd').toUpperCase();
+          document.getElementById('orderAmount').textContent = `$${amount} ${currency}`;
+        }
+        if (data.status === 'paid') {
+          document.getElementById('orderStatus').textContent = 'Payment Received';
+        }
+      } catch {
+        // non-critical
+      }
+
+      // Clear cart after successful purchase
+      localStorage.removeItem(CART_KEY);
+    }
+
+    loadOrderDetails();
+  </script>
+</body>
+</html>

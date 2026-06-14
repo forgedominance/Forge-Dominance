@@ -1,0 +1,11 @@
+:root{--bg:#050505;--ember:#D4500A;--plat:#F2F0EC;--silver:#9A9A9A;--faint:rgba(255,255,255,.055)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--plat);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.3em;margin-bottom:3rem}
+.brand span{color:var(--ember)}
+.code{font-family:'Bebas Neue',sans-serif;font-size:clamp(6rem,15vw,12rem);line-height:1;color:var(--ember);opacity:.8}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,4vw,2.5rem);letter-spacing:.08em;margin:1rem 0 .5rem}
+p{color:var(--silver);font-size:.9rem;max-width:28rem;line-height:1.7;margin-bottom:2.5rem}
+.links{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.links a{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--plat);border:1px solid var(--faint);padding:.75rem 1.5rem;transition:all .25s}
+.links a:hover{border-color:var(--ember);color:var(--ember)}

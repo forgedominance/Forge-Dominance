@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/css/products-components.css">
+  <link rel="stylesheet" href="/assets/admin/css/products.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div>
+        <div class="sidebar-brand-text">
+          <h3>FORGE DOMINANCE</h3>
+          <p>Admin Panel</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Core</div>
+          <a href="dashboard.html" class="nav-link">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="products-v2.html" class="nav-link active">
+            <span class="nav-icon">📦</span>
+            <span>Products</span>
+          </a>
+          <a href="orders.html" class="nav-link">
+            <span class="nav-icon">📋</span>
+            <span>Orders</span>
+          </a>
+          <a href="analytics.html" class="nav-link">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Management</div>
+          <a href="promotions.html" class="nav-link">
+            <span class="nav-icon">🎁</span>
+            <span>Promotions</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="settings.html" class="nav-link">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </a>
+          <a href="logs.html" class="nav-link">
+            <span class="nav-icon">📝</span>
+            <span>Logs</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <h4 id="userName">Admin User</h4>
+            <p id="userRole">Super Admin</p>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="logoutBtn" style="width: 100%;">Sign Out</button>
+      </div>
+    </aside>
+
+    <header class="admin-header">
+      <div class="header-title">
+        <h1>Products</h1>
+        <p>Manage featured products, all catalog items, and product images.</p>
+      </div>
+      <div class="header-actions">
+        <button id="btn-add" class="btn btn-primary">+ Add Product</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="products-shell">
+        <div class="page-intro">
+          <div>
+            <h1>Product Management</h1>
+            <p>Featured products drive the homepage, while the manage tab keeps your full catalog in sync with the database.</p>
+          </div>
+        </div>
+
+        <div id="status" class="status-bar">Initializing...</div>
+
+        <div class="tabs-nav" role="tablist">
+          <button class="tab active" data-tab="featured" type="button">Featured Products</button>
+          <button class="tab" data-tab="all" type="button">All Products</button>
+          <button class="tab" data-tab="sort-order" type="button">Sort Order</button>
+        </div>
+
+        <section id="panel-featured" class="panel active">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <h2 style="margin-top: 0; margin-bottom: 0;">Featured Products</h2>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button type="button" id="featured-save-btn" class="btn btn-primary">Save Featured</button>
+              <button type="button" id="featured-reset-btn" class="btn btn-secondary">Reset Featured</button>
+            </div>
+          </div>
+          <div id="featured-list" class="product-grid">
+            <div class="empty-state">Loading featured products...</div>
+          </div>
+        </section>
+
+        <section id="panel-all" class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <h2 style="margin-top: 0; margin-bottom: 0;">Manage All Products</h2>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <label for="category-filter" style="font-weight:600;color:var(--text-secondary);">Filter</label>
+              <select id="category-filter" class="form-control" style="min-width:13.75rem;">
+                <option value="all">All Categories</option>
+              </select>
+            </div>
+          </div>
+          <div id="all-list" class="product-list">
+            <div class="empty-state">Loading all products...</div>
+          </div>
+        </section>
+
+        <section id="panel-sort-order" class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <h2 style="margin-top:0;margin-bottom:0;">Sort Order</h2>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <select id="sort-category-filter" class="form-control" style="min-width:13.75rem;">
+                <option value="Hunters">Hunters</option>
+                <option value="Camp & Trail">Camp &amp; Trail</option>
+                <option value="Skinning Knives">Skinning Knives</option>
+                <option value="Folding Knives">Folding Knives</option>
+              </select>
+              <button type="button" id="sort-save-btn" class="btn btn-primary">Save Order</button>
+              <button type="button" id="sort-reset-btn" class="btn btn-secondary">Reset</button>
+            </div>
+          </div>
+          <p style="color:var(--text-tertiary);font-size:0.85rem;margin-bottom:1rem;">Drag and drop cards to set the display order on the collection page.</p>
+          <div id="sort-order-list" class="sort-order-grid"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="add-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add New Product</h2>
+        <button type="button" id="btn-close-modal" class="modal-close">✕</button>
+      </div>
+
+      <form id="add-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title">Product Name *</label>
+            <input id="title" name="title" type="text" required placeholder="e.g., Damascus Hunter Blade">
+          </div>
+          <div class="form-group">
+            <label for="sku">SKU</label>
+            <input id="sku" name="sku" type="text" placeholder="e.g., DH-2024-001">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="price">Price ($)</label>
+            <input id="price" name="price" type="number" step="0.01" min="0" placeholder="0.00">
+          </div>
+            <div class="form-group">
+              <label for="compare_price">Compare Price ($)</label>
+              <input id="compare_price" name="compare_price" type="number" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="stock">Stock</label>
+              <input id="stock" name="stock" type="number" step="1" min="0" placeholder="0">
+            </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category"><option value="">-- Select category --</option></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="5" placeholder="Describe the product..."></textarea>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="craft_story">Craft Story</label>
+            <textarea id="craft_story" name="craft_story" rows="4" placeholder="Tell the product story and craftsmanship details."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="recommended_use">Recommended Use</label>
+            <textarea id="recommended_use" name="recommended_use" rows="4" placeholder="Best use cases, care, and handling."></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="blade">Blade</label>
+            <input id="blade" name="blade" type="text" placeholder="Blade specs or material">
+          </div>
+          <div class="form-group">
+            <label for="overall">Overall</label>
+            <input id="overall" name="overall" type="text" placeholder="Overall length or dimensions">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="handle">Handle</label>
+            <input id="handle" name="handle" type="text" placeholder="Handle material or style">
+          </div>
+          <div class="form-group">
+            <label for="weight">Weight</label>
+            <input id="weight" name="weight" type="text" placeholder="Blade weight">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="grind">Grind</label>
+            <input id="grind" name="grind" type="text" placeholder="Flat, hollow, scandi, etc.">
+          </div>
+          <div class="form-group">
+            <label for="tang">Tang</label>
+            <input id="tang" name="tang" type="text" placeholder="Full tang, hidden tang, etc.">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="comparison_rows">Comparison Rows (JSON)</label>
+            <textarea id="comparison_rows" name="comparison_rows" rows="4" placeholder='[{"label":"Edge","value":"Hand forged"}]'></textarea>
+          </div>
+          <div class="form-group">
+            <label for="trust_badges">Trust Badges (JSON)</label>
+            <textarea id="trust_badges" name="trust_badges" rows="4" placeholder='[{"label":"Warranty","value":"Lifetime"}]'></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="features">Features (JSON)</label>
+            <textarea id="features" name="features" rows="4" placeholder='[{"title":"Full Tang","text":"Heavy duty construction"}]'></textarea>
+          </div>
+          <div class="form-group">
+            <label for="specifications">Specifications (JSON)</label>
+            <textarea id="specifications" name="specifications" rows="4" placeholder='[{"label":"Steel","value":"1095"}]'></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="descriptions">Extra Descriptions (JSON)</label>
+            <textarea id="descriptions" name="descriptions" rows="4" placeholder='[{"heading":"Why it matters","text":"..."}]'></textarea>
+          </div>
+          <div class="form-group">
+            <label for="variants">Variants (JSON)</label>
+            <textarea id="variants" name="variants" rows="4" placeholder='[{"name":"Black Handle","price":199.99}]'></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="display_options">Display Options (JSON)</label>
+            <textarea id="display_options" name="display_options" rows="4" placeholder='{"show_stock":true,"show_rating":false}'></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; padding: 1rem; border: 0.0625rem solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-quaternary);">
+          <label for="image" style="display:block; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem;">Product Images</label>
+          <input id="image" name="image" type="file" accept="image/*" multiple>
+          <div class="toolbar-note">Select multiple images, reorder them, and choose the thumbnail.</div>
+          <div id="preview" class="image-list" style="margin-top: 1rem;">
+            <div style="grid-column: 1/-1; color: var(--text-tertiary);">No images selected</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem; display:flex; align-items:center; gap:0.75rem;">
+          <input id="featured" name="featured" type="checkbox" style="width:auto; height:1.125rem;">
+          <label for="featured" style="margin:0;">Mark as featured product</label>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" id="btn-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-submit" class="btn btn-primary">Create Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/js/site-settings.js?v=20260613" defer></script><script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/products-v2.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

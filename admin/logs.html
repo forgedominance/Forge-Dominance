@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/logs.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div><div class="sidebar-brand-text"><h3>FORGE DOMINANCE</h3><p>Admin Panel</p></div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section"><div class="nav-section-title">Core</div><a href="/admin/dashboard.html" class="nav-link"><span class="nav-icon">📊</span><span>Dashboard</span></a><a href="/admin/products-v2.html" class="nav-link"><span class="nav-icon">📦</span><span>Products</span></a><a href="/admin/orders.html" class="nav-link"><span class="nav-icon">📋</span><span>Orders</span></a><a href="/admin/analytics.html" class="nav-link"><span class="nav-icon">📈</span><span>Analytics</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Management</div><a href="/admin/promotions.html" class="nav-link"><span class="nav-icon">🎁</span><span>Promotions</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">System</div><a href="/admin/settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span>Settings</span></a><a href="/admin/logs.html" class="nav-link active"><span class="nav-icon">📝</span><span>Logs</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">A</div><div class="user-info"><h4 id="userName">Admin User</h4><p id="userRole">Super Admin</p></div></div><button class="btn" id="logoutBtn">Sign Out</button></div>
+    </aside>
+
+    <header class="admin-header logs-header">
+      <div class="header-title"><h1>Admin Activity Logs</h1><p>Track admin login sessions and activities.</p></div>
+      <div class="header-actions">
+        <button class="delete-all-btn" id="deleteAllBtn">Delete All History</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="chart-card">
+        <div id="unauthorizedContainer" style="display: none;">
+          <div class="unauthorized-message">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <h2>Access Denied</h2>
+            <p>Only Super Admins can access this page.</p>
+          </div>
+        </div>
+
+        <div id="logsContainer" style="display: none;">
+          <div class="logs-stats">
+            <div class="logs-stat-card">
+              <div class="logs-stat-label">Total Sessions</div>
+              <div class="logs-stat-value" id="totalSessionsStat">0</div>
+            </div>
+            <div class="logs-stat-card">
+              <div class="logs-stat-label">Active Sessions</div>
+              <div class="logs-stat-value" id="activeSessionsStat">0</div>
+            </div>
+            <div class="logs-stat-card">
+              <div class="logs-stat-label">Unique Admins</div>
+              <div class="logs-stat-value" id="uniqueAdminsStat">0</div>
+            </div>
+          </div>
+
+          <div class="logs-controls">
+            <div>
+              <h2 style="margin:0;font-size:1.25rem;">Login History</h2>
+              <p style="margin:0.5rem 0 0 0;color:var(--text-tertiary);font-size:0.9rem;" id="logsUpdated">Updated just now</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <div id="dayFilters"></div>
+              <span class="pill" id="logsSummary">Loading...</span>
+            </div>
+          </div>
+
+          <div class="logs-table-wrapper">
+            <table class="logs-table">
+              <thead>
+                <tr>
+                  <th>Admin Email</th>
+                  <th>Status</th>
+                  <th>Login Time</th>
+                  <th>Logout Time</th>
+                  <th>IP Address</th>
+                  <th>Session Details</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="logsBody">
+                <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--text-tertiary);">Loading logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="logsEmpty" class="logs-empty" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M4 6h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
+            <p>No login history found.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/logs-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

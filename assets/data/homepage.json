@@ -1,0 +1,18 @@
+{
+  "hero": {
+    "eyebrow": "Hand Forged in USA · Limited Batches · Since 2010",
+    "headline": ["FORGE", "YOUR", "DOMINANCE"],
+    "subtext": "The knife industry runs on mediocrity. We built Bladesmith to end that. Premium American steel. Obsessive craftsmanship. A lifetime guarantee with zero exceptions.",
+    "floats": [
+      { "value": "1,400+", "label": "Hunters Equipped" },
+      { "value": "14yr", "label": "Forging Legacy" },
+      { "value": "∞", "label": "Warranty" }
+    ]
+  },
+  "statsBar": [
+    { "value": "1400", "suffix": "+", "label": "Hunters Equipped", "desc": "Verified USA & Canada customers" },
+    { "value": "14", "suffix": "yr", "label": "Years Forging", "desc": "Family-owned American workshop" },
+    { "value": "4.9", "suffix": "★", "label": "Average Rating", "desc": "Across all verified reviews" },
+    { "value": "40", "suffix": "h", "label": "Per Blade", "desc": "Average handcrafting hours" }
+  ]
+}

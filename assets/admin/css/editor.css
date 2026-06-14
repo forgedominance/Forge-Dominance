@@ -1,0 +1,80 @@
+/*
+ * editor.css — Visual page editor styles
+ * Extracted from admin/editor.html
+ */
+html,body{height:100%;overflow:hidden}
+.admin-container{grid-template-columns:16.25rem 1fr;grid-template-rows:1fr;height:100vh}
+.admin-sidebar{grid-row:1/-1}
+.admin-header{display:none!important}
+.admin-main{grid-column:2;grid-row:1;padding:0;overflow:hidden;display:flex;flex-direction:column;height:100vh}
+
+/* Editor toolbar */
+.ed-toolbar{height:48px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.ed-toolbar select{background:var(--bg-tertiary);border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:var(--radius-md);font-size:13px;outline:none}
+.ed-toolbar select:focus{border-color:var(--primary-500)}
+.ed-sep{width:1px;height:24px;background:var(--border-color)}
+.ed-btn{padding:5px 10px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;color:var(--text-tertiary);cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;gap:4px}
+.ed-btn:hover{background:var(--bg-tertiary);color:var(--text-primary);border-color:var(--border-color)}
+.ed-btn.active{background:var(--primary-500);color:#fff}
+.ed-save{background:linear-gradient(135deg,var(--primary-500),var(--primary-600));color:#fff;font-weight:600;padding:6px 16px;border:none}
+.ed-save:hover{box-shadow:0 4px 12px rgba(212,80,10,.3);transform:translateY(-1px)}
+.ed-save.unsaved{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(212,80,10,.4)}50%{box-shadow:0 0 0 8px rgba(212,80,10,0)}}
+.ed-save.saving{opacity:.6;pointer-events:none}
+.ed-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* Editor body */
+.ed-body{flex:1;display:flex;overflow:hidden}
+.ed-panel{width:260px;background:var(--bg-secondary);border-right:1px solid var(--border-color);overflow-y:auto;flex-shrink:0}
+.ed-panel::-webkit-scrollbar{width:4px}
+.ed-panel::-webkit-scrollbar-thumb{background:var(--primary-600);border-radius:4px}
+.ed-panel-section{padding:12px;border-bottom:1px solid var(--border-light)}
+.ed-panel-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-tertiary);margin-bottom:8px;font-weight:600}
+.ed-section-item{background:var(--bg-tertiary);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:8px 10px;cursor:grab;font-size:12px;color:var(--text-secondary);transition:all .2s;margin-bottom:5px}
+.ed-section-item:hover{border-color:var(--primary-500);color:var(--text-primary);transform:translateY(-1px)}
+
+/* Properties panel */
+.ed-props{width:280px;background:var(--bg-secondary);border-left:1px solid var(--border-color);overflow-y:auto;flex-shrink:0}
+.ed-props::-webkit-scrollbar{width:4px}
+.ed-props::-webkit-scrollbar-thumb{background:var(--primary-600);border-radius:4px}
+.prop-group{padding:0 12px;margin-bottom:10px}
+.prop-label{font-size:10px;color:var(--text-tertiary);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.prop-input{width:100%;background:var(--bg-tertiary);border:1px solid var(--border-color);color:var(--text-primary);padding:6px 8px;border-radius:var(--radius-md);font-size:12px;outline:none}
+.prop-input:focus{border-color:var(--primary-500)}
+.prop-row{display:flex;gap:6px;align-items:center}
+.prop-row .prop-input{flex:1}
+.prop-color{width:28px;height:28px;border-radius:var(--radius-md);border:1px solid var(--border-color);overflow:hidden;cursor:pointer}
+.prop-color input[type=color]{width:36px;height:36px;border:none;cursor:pointer;margin:-4px}
+.prop-btn{width:100%;padding:7px;border-radius:var(--radius-md);border:1px solid var(--border-color);background:var(--bg-tertiary);color:var(--text-primary);font-size:12px;cursor:pointer;transition:all .15s}
+.prop-btn:hover{border-color:var(--primary-500);color:var(--primary-400)}
+.prop-btn-danger{border-color:var(--error-500);color:var(--error-400)}
+.prop-btn-danger:hover{background:var(--error-500);color:#fff}
+.no-sel{padding:32px 12px;text-align:center;color:var(--text-tertiary);font-size:12px}
+
+/* Canvas */
+.ed-canvas{flex:1;overflow:auto;background:#1a1a1a;display:flex;align-items:stretch;justify-content:center;padding:0;position:relative}
+.ed-iframe-wrap{width:100%;height:100%;transition:all .35s cubic-bezier(.4,0,.2,1);display:flex}
+.ed-iframe-wrap.tablet{max-width:768px;margin:16px auto;border-radius:10px;box-shadow:0 0 0 10px var(--bg-tertiary),0 20px 60px rgba(0,0,0,.5);height:calc(100% - 32px)}
+.ed-iframe-wrap.mobile{max-width:375px;margin:16px auto;border-radius:20px;box-shadow:0 0 0 12px var(--bg-tertiary),0 20px 60px rgba(0,0,0,.5);height:calc(100% - 32px)}
+.ed-iframe-wrap iframe{width:100%;height:100%;border:none;display:block;flex:1;background:#050505}
+.ed-iframe-wrap.tablet iframe,.ed-iframe-wrap.mobile iframe{border-radius:6px}
+.ed-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:14px;pointer-events:none}
+.ed-placeholder.hidden{display:none}
+
+/* Toast */
+.ed-toast-wrap{position:fixed;top:60px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px}
+.ed-toast{padding:8px 14px;border-radius:var(--radius-md);font-size:12px;color:#fff;animation:edSlide .3s;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.ed-toast.success{background:var(--success-500)}.ed-toast.error{background:var(--error-500)}.ed-toast.info{background:var(--primary-500)}
+@keyframes edSlide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* Mobile responsive */
+@media(max-width:64rem){
+  .admin-container{grid-template-columns:1fr}
+  .admin-sidebar{position:fixed;left:0;top:0;width:17rem;height:100vh;z-index:900;transform:translateX(-100%);transition:transform .3s}
+  .admin-sidebar.open{transform:translateX(0)}
+  .admin-main{grid-column:1}
+  .ed-panel{position:fixed;top:48px;left:0;width:260px;height:calc(100% - 48px);z-index:80;transform:translateX(-100%);transition:transform .3s}
+  .ed-panel.open{transform:translateX(0)}
+  .ed-props{position:fixed;right:0;bottom:0;width:100%;height:260px;z-index:80;border-left:none;border-top:1px solid var(--border-color);transform:translateY(100%)}
+  .ed-props.open{transform:translateY(0)}
+}

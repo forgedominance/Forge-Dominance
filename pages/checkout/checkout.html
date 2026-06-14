@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forge    Dominance | Forge    Dominance</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=IBM+Plex+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/colors.css">
+  <link rel="stylesheet" href="../../assets/css/shared.css">
+  <link rel="stylesheet" href="../../assets/css/checkout.css">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/favicon.svg">
+</head>
+<body class="checkout-page">
+  <nav class="checkout-nav">
+    <a href="../../index.html" class="nav-logo">FORGE<span>DOMINANCE</span></a>
+    <div class="checkout-steps">
+      <span class="step done">1. Cart</span>
+      <span class="step-divider done"></span>
+      <span class="step active">2. Checkout</span>
+      <span class="step-divider"></span>
+      <span class="step">3. Confirmation</span>
+    </div>
+  </nav>
+
+  <main class="checkout-main">
+    <section class="checkout-container checkout-grid">
+      <div class="checkout-form-section">
+        <div class="checkout-header">
+          <h1>Checkout</h1>
+          <p class="checkout-subtitle">Complete your purchase</p>
+        </div>
+
+        <form id="checkoutForm" class="checkout-form">
+          <div class="form-section">
+            <h2>Contact Information</h2>
+            <div class="form-field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" required placeholder="John">
+              </div>
+              <div class="form-field">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" required placeholder="Doe">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Shipping Address</h2>
+            <div class="form-field">
+              <label for="address">Address</label>
+              <input type="text" id="address" name="address" required placeholder="123 Main St">
+            </div>
+            <div class="form-field">
+              <label for="address2">Apartment, suite, etc. (optional)</label>
+              <input type="text" id="address2" name="address2" placeholder="Apt 4B">
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" required placeholder="New York">
+              </div>
+              <div class="form-field">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" required placeholder="NY">
+              </div>
+              <div class="form-field">
+                <label for="zip">ZIP Code</label>
+                <input type="text" id="zip" name="zip" required placeholder="10001">
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="country">Country</label>
+              <select id="country" name="country" required>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-full" id="payBtn">
+            <span id="payBtnText">Pay with Stripe</span>
+            <span id="payBtnLoading" style="display:none;">Processing...</span>
+          </button>
+        </form>
+      </div>
+
+      <aside class="checkout-order-summary">
+        <h2>Order Summary</h2>
+        <div id="orderItems"></div>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="summarySubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span class="shipping-free">FREE</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total</span>
+          <span id="summaryTotal">$0.00</span>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="checkout-footer">
+    <p>&copy; 2026 Forge Dominance. Secure checkout powered by Stripe.</p>
+  </footer>
+
+  <script src="../../assets/js/site-settings.js"></script>
+  <script>
+    const CART_KEY = 'bs_checkout_cart';
+
+    function getCart() {
+      try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
+    }
+
+    function renderOrderSummary() {
+      const cart = getCart();
+      if (!cart.length) {
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      let subtotal = 0;
+      const container = document.getElementById('orderItems');
+      container.innerHTML = cart.map(item => {
+        const lineTotal = (item.price || 0) * (item.quantity || 1);
+        subtotal += lineTotal;
+        return `
+          <div class="summary-item">
+            <div class="summary-item-info">
+              <span class="summary-item-name">${item.name || 'Product'}</span>
+              <span class="summary-item-qty">x${item.quantity || 1}</span>
+            </div>
+            <span class="summary-item-price">$${lineTotal.toFixed(2)}</span>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('summarySubtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('summaryTotal').textContent = '$' + subtotal.toFixed(2);
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('payBtn');
+      const btnText = document.getElementById('payBtnText');
+      const btnLoading = document.getElementById('payBtnLoading');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnLoading.style.display = 'inline';
+
+      try {
+        const cart = getCart();
+        const email = document.getElementById('email').value.trim();
+
+        const items = cart.map(item => ({
+          name: item.name || 'Product',
+          price: item.price || 0,
+          quantity: item.quantity || 1,
+          image: item.image || ''
+        }));
+
+        const res = await fetch('/api/stripe/checkout/create-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items,
+            customerEmail: email,
+            successUrl: window.location.origin + '/pages/checkout/success.html?session_id={CHECKOUT_SESSION_ID}',
+            cancelUrl: window.location.origin + '/pages/checkout/cancel.html'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Payment failed');
+
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } catch (error) {
+        alert(error.message || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+      }
+    });
+
+    renderOrderSummary();
+  </script>
+</body>
+</html>

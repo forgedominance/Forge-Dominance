@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/chat.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div><div class="sidebar-brand-text"><h3>FORGE DOMINANCE</h3><p>Admin Panel</p></div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section"><div class="nav-section-title">Core</div><a href="/admin/dashboard.html" class="nav-link"><span class="nav-icon">&#128202;</span><span>Dashboard</span></a><a href="/admin/products-v2.html" class="nav-link"><span class="nav-icon">&#128230;</span><span>Products</span></a><a href="/admin/orders.html" class="nav-link"><span class="nav-icon">&#128203;</span><span>Orders</span></a><a href="/admin/analytics.html" class="nav-link"><span class="nav-icon">&#128200;</span><span>Analytics</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Management</div><a href="/admin/promotions.html" class="nav-link"><span class="nav-icon">&#127873;</span><span>Promotions</span></a><a href="/admin/chat.html" class="nav-link active"><span class="nav-icon">&#128172;</span><span>Live Chat</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">System</div><a href="/admin/settings.html" class="nav-link"><span class="nav-icon">&#9881;&#65039;</span><span>Settings</span></a><a href="/admin/logs.html" class="nav-link"><span class="nav-icon">&#128221;</span><span>Logs</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">A</div><div class="user-info"><h4 id="userName">Admin User</h4><p id="userRole">Super Admin</p></div></div><button class="btn" id="logoutBtn">Sign Out</button></div>
+    </aside>
+
+    <header class="admin-header">
+      <div class="header-title"><h1>Live Chat</h1><p>Respond to customer messages in real time.</p></div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button class="btn" id="tabChatsBtn" onclick="switchMainTab('chats')" style="background:var(--primary);color:#fff;">Chats</button>
+        <button class="btn" id="tabFaqBtn" onclick="switchMainTab('faq')">FAQ Manager</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="chat-layout" id="chatsPanel">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header">
+            <h3>Conversations</h3>
+            <div class="chat-search">
+              <input type="text" id="chatSearchInput" placeholder="Search conversations..." oninput="filterConversations(this.value)">
+            </div>
+          </div>
+          <div class="chat-sidebar-tabs">
+            <button class="active" onclick="loadConversations('open','all')">Open</button>
+            <button onclick="loadConversations('closed','all')">Closed</button>
+            <button onclick="loadConversations('open','unread')">Unread</button>
+          </div>
+          <div class="chat-list" id="chatList">
+            <div class="chat-empty"><span class="chat-empty-icon">&#128172;</span><p>Loading conversations...</p></div>
+          </div>
+          <div class="chat-list-stats">
+            <span><span class="stat-dot"></span><span id="chatOnlineCount">0</span> active</span>
+            <span id="chatTotalCount">0 conversations</span>
+          </div>
+        </div>
+
+        <div class="chat-main">
+          <div class="chat-main-header" id="chatMainHeader" style="display:none;">
+            <div class="chat-header-user">
+              <div class="chat-header-avatar" id="chatHeaderAvatar">?</div>
+              <div class="chat-header-info">
+                <h3 id="chatConvoTitle">Select a conversation</h3>
+                <span id="chatConvoMeta">Waiting for selection</span>
+              </div>
+            </div>
+            <div class="chat-header-actions">
+              <button class="chat-action-btn success" id="closeConvoBtn" onclick="closeConversation()">Resolve</button>
+              <button class="chat-action-btn danger" id="deleteConvoBtn" onclick="deleteConversation()">Delete</button>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty"><span class="chat-empty-icon">&#128172;</span><p>Select a conversation from the left panel to start replying</p></div>
+          </div>
+          <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <span>Customer is typing...</span>
+          </div>
+          <div class="chat-input-area" id="chatInputArea" style="display:none;">
+            <div class="chat-input-wrapper">
+              <input type="text" id="adminChatInput" placeholder="Type your reply..." onkeydown="if(event.key==='Enter')sendAdminReply()">
+              <button class="chat-send-btn" onclick="sendAdminReply()" id="adminSendBtn">Send &#10148;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Management Panel -->
+      <div class="faq-panel" id="faqPanel">
+        <div class="faq-panel-header">
+          <h3>FAQ Questions</h3>
+          <button class="faq-add-btn" onclick="openFaqModal()">+ Add Question</button>
+        </div>
+        <div class="faq-items" id="faqItems">
+          <div class="faq-empty">Loading FAQ...</div>
+        </div>
+      </div>
+
+      <!-- FAQ Edit/Add Modal -->
+      <div class="faq-modal-overlay" id="faqModalOverlay" onclick="if(event.target===this)closeFaqModal()">
+        <div class="faq-modal">
+          <h3 id="faqModalTitle">Add FAQ Question</h3>
+          <label for="faqQuestionInput">Question</label>
+          <input type="text" id="faqQuestionInput" placeholder="Enter question...">
+          <label for="faqAnswerInput">Answer</label>
+          <textarea id="faqAnswerInput" placeholder="Enter answer..."></textarea>
+          <div class="faq-modal-btns">
+            <button onclick="closeFaqModal()">Cancel</button>
+            <button class="primary" onclick="saveFaqItem()">Save</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/chat-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

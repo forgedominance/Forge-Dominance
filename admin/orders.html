@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/orders.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div><div class="sidebar-brand-text"><h3>FORGE DOMINANCE</h3><p>Admin Panel</p></div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section"><div class="nav-section-title">Core</div><a href="/admin/dashboard.html" class="nav-link"><span class="nav-icon">📊</span><span>Dashboard</span></a><a href="/admin/products-v2.html" class="nav-link"><span class="nav-icon">📦</span><span>Products</span></a><a href="/admin/orders.html" class="nav-link active"><span class="nav-icon">📋</span><span>Orders</span></a><a href="/admin/analytics.html" class="nav-link"><span class="nav-icon">📈</span><span>Analytics</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Management</div><a href="/admin/promotions.html" class="nav-link"><span class="nav-icon">🎁</span><span>Promotions</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">System</div><a href="/admin/settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span>Settings</span></a><a href="/admin/logs.html" class="nav-link"><span class="nav-icon">📝</span><span>Logs</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">A</div><div class="user-info"><h4 id="userName">Admin User</h4><p id="userRole">Super Admin</p></div></div><button class="btn" id="logoutBtn">Sign Out</button></div>
+    </aside>
+
+    <header class="admin-header"><div class="header-title"><h1>Orders</h1><p>Manage customer orders and commissions.</p></div><button class="btn btn-primary" id="toggleFormBtn" style="white-space:nowrap;font-size:1.5rem;width:2.75rem;height:2.75rem;padding:0;display:flex;align-items:center;justify-content:center;border-radius:0.5rem;">+</button></header>
+
+    <main class="admin-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <button id="tabOrders" class="btn btn-ghost" type="button">Orders</button>
+          <button id="tabCommissions" class="btn btn-ghost" type="button">Commissions</button>
+        </div>
+        <div id="commissionsControls" style="display:none;align-items:center;gap:0.75rem;">
+          <span class="pill" id="commissionsSummary">Loading...</span>
+        </div>
+      </div>
+
+      <section id="ordersPanel" class="chart-card">
+        <div class="section-header" style="justify-content:space-between;align-items:center;gap:1rem;">
+          <div>
+            <h2 style="margin:0;font-size:1.5rem;">All Orders</h2>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+            <select id="statusFilter" class="orders-filter-select">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="placed">Placed</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="on hold">On Hold</option>
+              <option value="shipped">Shipped</option>
+            </select>
+            <span class="pill" id="ordersSummary">Loading...</span>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="recent-orders-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--bg-secondary);">
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Order ID</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Customer ID</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Customer</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Email</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Status</th>
+                <th style="text-align:right;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Total</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Items</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Created At</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Updated At</th>
+                <th style="text-align:center;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody">
+              <tr>
+                <td colspan="10" style="padding:2rem;text-align:center;color:var(--text-tertiary);">Loading orders...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <section id="commissionsPanel" class="chart-card" style="display:none;margin-top:1.5rem;">
+        <div class="section-header" style="justify-content:space-between;align-items:center;gap:1rem;">
+          <div>
+            <h2 style="margin:0;font-size:1.25rem;">Commissions</h2>
+            <p style="margin:0;color:var(--text-tertiary);font-size:0.9rem;">Manage commission requests from customers.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <select id="commissionTopFilter" style="padding:0.6rem;border:0.0625rem solid var(--border-color);border-radius:0.375rem;">
+              <option value="">All Statuses</option>
+              <option value="replied">replied</option>
+              <option value="not replied">not replied</option>
+            </select>
+            <button id="deleteAllCommissionsBtn" class="btn" style="background:var(--error-400,#e53e3e);color:#fff;padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.85rem;">Delete All</button>
+            <span class="pill" id="commissionsTopSummary">Loading...</span>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="recent-orders-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--bg-secondary);">
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">ID</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Full Name</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Email</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Phone</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Status</th>
+                <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Created At</th>
+                <th style="text-align:center;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="commissionsBody">
+              <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--text-tertiary);">Loading commissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="addOrderModal" class="order-modal-overlay" aria-hidden="true">
+    <form id="addOrderForm" class="order-modal" aria-labelledby="addOrderTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <h3 id="addOrderTitle" style="margin:0;font-size:1.25rem;">New Order Form</h3>
+          <p style="margin:0.35rem 0 0 0;color:var(--text-secondary);font-size:0.875rem;">Create a new order without changing the table layout.</p>
+        </div>
+        <button type="button" class="btn" id="cancelFormBtn" style="background:var(--bg-secondary);color:var(--text-primary);">Close</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;">
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Full Name *</label>
+          <input type="text" id="customerName" placeholder="Enter customer name" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;" required>
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Email Address *</label>
+          <input type="email" id="customerEmail" placeholder="customer@example.com" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;" required>
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Phone Number</label>
+          <input type="tel" id="customerPhone" placeholder="123-456-7890" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;">
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Order Status *</label>
+          <select id="orderStatus" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;" required>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="on hold">On Hold</option>
+            <option value="shipped">Shipped</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Address</label>
+          <input type="text" id="customerAddress" placeholder="123 Main Street" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;">
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">City</label>
+          <input type="text" id="customerCity" placeholder="New York" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;">
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">State</label>
+          <input type="text" id="customerState" placeholder="NY" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;">
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Zip Code</label>
+          <input type="text" id="customerZip" placeholder="10001" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;">
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.875rem;">Order Total *</label>
+          <input type="number" id="orderTotal" placeholder="0.00" min="0" step="0.01" style="width:100%;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.5rem;font-size:0.875rem;" required>
+          <p style="margin:0.35rem 0 0 0;color:var(--text-tertiary);font-size:0.75rem;">Auto-calculated from selected products, but you can adjust it.</p>
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <div class="section-header" style="justify-content:space-between;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.75rem;">
+            <div>
+              <label style="display:block;margin-bottom:0.25rem;font-weight:500;font-size:0.875rem;">Order Products *</label>
+              <p style="margin:0;color:var(--text-tertiary);font-size:0.75rem;">Search products, add them to the order, and adjust quantities below.</p>
+            </div>
+            <button type="button" class="btn" id="openProductPickerBtn" style="background:var(--bg-secondary);color:var(--text-primary);">+ Add Product</button>
+          </div>
+
+          <input type="hidden" id="orderItems">
+          <div id="selectedProductsList" class="order-selected-list">
+            <div style="padding:1rem;border:0.0625rem dashed var(--border-light);border-radius:0.9rem;color:var(--text-tertiary);text-align:center;">No products selected yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;justify-content:flex-end;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary">Create Order</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="productPickerModal" class="order-modal-overlay" aria-hidden="true">
+    <div class="order-modal" role="dialog" aria-modal="true" aria-labelledby="productPickerTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+        <div>
+          <h3 id="productPickerTitle" style="margin:0;font-size:1.2rem;">Select Products</h3>
+          <p style="margin:0.35rem 0 0 0;color:var(--text-secondary);font-size:0.875rem;">Search the catalog and add products to the order.</p>
+        </div>
+        <button type="button" class="btn" id="closeProductPickerBtn" style="background:var(--bg-secondary);color:var(--text-primary);">Close</button>
+      </div>
+      <input id="productSearchInput" type="search" placeholder="Search product by name..." style="width:100%;padding:0.85rem 1rem;border:0.0625rem solid var(--border-light);border-radius:0.75rem;font-size:0.95rem;">
+      <div id="productPickerList" class="order-product-grid">
+        <div style="padding:1rem;text-align:center;color:var(--text-tertiary);grid-column:1/-1;">Loading products...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="orderDetailModal" class="order-modal-overlay" aria-hidden="true">
+    <div class="order-modal" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+        <div>
+          <h3 id="orderDetailTitle" style="margin:0;font-size:1.2rem;">Order Details</h3>
+          <p style="margin:0.35rem 0 0 0;color:var(--text-secondary);font-size:0.875rem;">Edit any field below and save the changes.</p>
+        </div>
+        <button type="button" class="btn" id="closeOrderDetailBtn" style="background:var(--bg-secondary);color:var(--text-primary);">Close</button>
+      </div>
+
+      <form id="orderDetailForm" style="display:grid;gap:1rem;overflow:auto;padding-right:0.25rem;">
+        <input type="hidden" id="detailOrderId">
+        <div class="order-detail-grid">
+          <div class="order-detail-field">
+            <label for="detailCustomerId">Customer ID</label>
+            <input id="detailCustomerId" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailStatus">Order Condition / Status</label>
+            <select id="detailStatus">
+              <option value="pending">Pending</option>
+              <option value="placed">Placed</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="on hold">On Hold</option>
+              <option value="shipped">Shipped</option>
+            </select>
+          </div>
+
+          <div class="order-detail-field">
+            <label for="detailCustomerName">Customer Name</label>
+            <input id="detailCustomerName" type="text">
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCustomerEmail">Customer Email</label>
+            <input id="detailCustomerEmail" type="email">
+          </div>
+
+          <div class="order-detail-field">
+            <label for="detailCustomerPhone">Customer Phone</label>
+            <input id="detailCustomerPhone" type="text">
+          </div>
+          <div class="order-detail-field">
+            <label for="detailOrderTotal">Order Total</label>
+            <input id="detailOrderTotal" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="order-detail-field">
+            <label for="detailCustomerAddress">Address</label>
+            <input id="detailCustomerAddress" type="text">
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCustomerCity">City</label>
+            <input id="detailCustomerCity" type="text">
+          </div>
+
+          <div class="order-detail-field">
+            <label for="detailCustomerState">State</label>
+            <input id="detailCustomerState" type="text">
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCustomerZip">Zip Code</label>
+            <input id="detailCustomerZip" type="text">
+          </div>
+
+          <div class="order-detail-field full-span">
+            <label for="detailItems">Order Items JSON</label>
+            <textarea id="detailItems" placeholder='[{"product_id":1,"product_name":"Sword","qty":1,"price":100}]'></textarea>
+          </div>
+
+          <div class="order-detail-field full-span">
+            <div class="order-summary-panel">
+              <div class="order-summary-row"><strong>Created At</strong><span id="detailCreatedAt">-</span></div>
+              <div class="order-summary-row"><strong>Updated At</strong><span id="detailUpdatedAt">-</span></div>
+              <div class="order-summary-row"><strong>Item Count</strong><span id="detailItemCount">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;justify-content:flex-end;flex-wrap:wrap;">
+          <button type="button" class="btn" id="deleteOrderBtn" style="background:#fee2e2;color:#991b1b;border-color:#fecaca;">Delete Order</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Commission Detail Modal -->
+  <div id="commissionDetailModal" class="order-modal-overlay" aria-hidden="true">
+    <div class="order-modal" role="dialog" aria-modal="true" aria-labelledby="commissionDetailTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+        <div>
+          <h3 id="commissionDetailTitle" style="margin:0;font-size:1.2rem;">Commission Details</h3>
+          <p style="margin:0.35rem 0 0 0;color:var(--text-secondary);font-size:0.875rem;">Edit notes and status, then save.</p>
+        </div>
+        <button type="button" class="btn" id="closeCommissionDetailBtn" style="background:var(--bg-secondary);color:var(--text-primary);">Close</button>
+      </div>
+
+      <form id="commissionDetailForm" style="display:grid;gap:1rem;overflow:auto;padding-right:0.25rem;">
+        <input type="hidden" id="detailCommissionId">
+        <div class="order-detail-grid">
+          <div class="order-detail-field">
+            <label for="detailCommissionFullName">Full Name</label>
+            <input id="detailCommissionFullName" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionEmail">Email</label>
+            <input id="detailCommissionEmail" type="email" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionPhone">Phone</label>
+            <input id="detailCommissionPhone" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionCountry">Country</label>
+            <input id="detailCommissionCountry" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionBudget">Budget</label>
+            <input id="detailCommissionBudget" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionSource">Source</label>
+            <input id="detailCommissionSource" type="text" readonly>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionStatus">Status</label>
+            <select id="detailCommissionStatus">
+              <option value="replied">replied</option>
+              <option value="not replied">not replied</option>
+            </select>
+          </div>
+          <div class="order-detail-field">
+            <label for="detailCommissionCreated">Created At</label>
+            <input id="detailCommissionCreated" type="text" readonly>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:0.75rem;">
+          <div>
+            <label for="detailCommissionBrief">Brief</label>
+            <textarea id="detailCommissionBrief" readonly style="width:100%;min-height:6.25rem;padding:0.6rem;border:0.0625rem solid var(--border-light);border-radius:0.75rem;"></textarea>
+          </div>
+          <div>
+            <label for="detailCommissionNotes">Notes (editable)</label>
+            <textarea id="detailCommissionNotes" style="width:100%;min-height:6.25rem;padding:0.6rem;border:0.0625rem solid var(--border-light);border-radius:0.75rem;"></textarea>
+          </div>
+          <div>
+            <label>Reference Image</label>
+            <div style="width:100%;max-height:25rem;border:0.0625rem solid var(--border-light);border-radius:0.75rem;overflow:auto;display:flex;align-items:center;justify-content:center;background:var(--bg-secondary);">
+              <img id="detailCommissionImage" src="" alt="reference" style="max-width:100%;height:auto;max-height:25rem;object-fit:contain;padding:0.75rem;">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+          <button type="button" class="btn" id="closeCommissionBtn" style="background:var(--bg-secondary);color:var(--text-primary);">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/orders-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

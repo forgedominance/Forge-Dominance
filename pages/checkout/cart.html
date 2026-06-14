@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forge    Dominance | Forge    Dominance</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=IBM+Plex+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/colors.css">
+  <link rel="stylesheet" href="../../assets/css/shared.css">
+  <link rel="stylesheet" href="../../assets/css/checkout.css">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/favicon.svg">
+</head>
+<body class="checkout-page">
+  <nav class="checkout-nav">
+    <a href="../../index.html" class="nav-logo">FORGE<span>DOMINANCE</span></a>
+    <div class="checkout-steps">
+      <span class="step active">1. Cart</span>
+      <span class="step-divider"></span>
+      <span class="step">2. Checkout</span>
+      <span class="step-divider"></span>
+      <span class="step">3. Confirmation</span>
+    </div>
+  </nav>
+
+  <main class="checkout-main">
+    <section class="checkout-container">
+      <div class="checkout-header">
+        <h1>Your Cart</h1>
+        <p class="checkout-subtitle">Review your items before checkout</p>
+      </div>
+
+      <div class="cart-items" id="cartItems">
+        <div class="cart-empty-state" id="cartEmpty">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M16 16V12a8 8 0 0116 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <p>Your cart is empty</p>
+          <a href="../collection.html" class="btn-primary">Browse Collection</a>
+        </div>
+      </div>
+
+      <div class="cart-summary" id="cartSummary" style="display:none;">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping (USA & Canada)</span>
+          <span class="shipping-free">FREE</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total</span>
+          <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="btn-primary btn-full" id="proceedCheckout">Proceed to Checkout</button>
+        <a href="../collection.html" class="btn-secondary">Continue Shopping</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="checkout-footer">
+    <p>&copy; 2026 Forge Dominance. Secure checkout powered by Stripe.</p>
+  </footer>
+
+  <script src="../../assets/js/site-settings.js"></script>
+  <script>
+    const CART_KEY = 'bs_checkout_cart';
+
+    function getCart() {
+      try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    }
+
+    function renderCart() {
+      const cart = getCart();
+      const container = document.getElementById('cartItems');
+      const summary = document.getElementById('cartSummary');
+      const empty = document.getElementById('cartEmpty');
+
+      if (!cart.length) {
+        container.innerHTML = '';
+        container.appendChild(empty);
+        empty.style.display = 'flex';
+        summary.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      summary.style.display = 'block';
+
+      let subtotal = 0;
+      container.innerHTML = cart.map((item, idx) => {
+        const lineTotal = (item.price || 0) * (item.quantity || 1);
+        subtotal += lineTotal;
+        return `
+          <div class="cart-item">
+            <div class="cart-item-image">
+              ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '<div class="cart-item-placeholder"></div>'}
+            </div>
+            <div class="cart-item-details">
+              <h3>${item.name || 'Product'}</h3>
+              ${item.variant ? `<p class="cart-item-variant">${item.variant}</p>` : ''}
+            </div>
+            <div class="cart-item-qty">
+              <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
+              <span>${item.quantity || 1}</span>
+              <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+            </div>
+            <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
+            <button class="cart-item-remove" onclick="removeItem(${idx})">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2L14 14M14 2L2 14" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('cartSubtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('cartTotal').textContent = '$' + subtotal.toFixed(2);
+    }
+
+    function updateQty(idx, delta) {
+      const cart = getCart();
+      if (!cart[idx]) return;
+      cart[idx].quantity = Math.max(1, (cart[idx].quantity || 1) + delta);
+      saveCart(cart);
+      renderCart();
+    }
+
+    function removeItem(idx) {
+      const cart = getCart();
+      cart.splice(idx, 1);
+      saveCart(cart);
+      renderCart();
+    }
+
+    document.getElementById('proceedCheckout').addEventListener('click', () => {
+      const cart = getCart();
+      if (!cart.length) return;
+      window.location.href = 'checkout.html';
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>

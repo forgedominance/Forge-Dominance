@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /backend/
+Disallow: /pgdata/
+Disallow: /node_modules/
+Disallow: /logs/
+
+# Block specific pages that should not be indexed
+Disallow: /pages/order.html
+Disallow: /admin/login.html
+
+Sitemap: https://YOUR_DOMAIN.COM/sitemap.xml

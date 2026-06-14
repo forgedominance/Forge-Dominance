@@ -1,0 +1,17 @@
+=== PRODUCTS SAMPLE ===
+id=9 | images=8 | thumb_len=85374 | thumb_is_data=yes
+id=7 | images=5 | thumb_len=85374 | thumb_is_data=yes
+id=6 | images=6 | thumb_len=117110 | thumb_is_data=yes
+id=5 | images=4 | thumb_len=71486 | thumb_is_data=yes
+id=4 | images=3 | thumb_len=96462 | thumb_is_data=yes
+id=3 | images=7 | thumb_len=44 | thumb_is_data=no
+id=2 | images=8 | thumb_len=44 | thumb_is_data=no
+
+=== FEATURED SAMPLE ===
+id=9 | images=8 | thumb_len=85374 | thumb_is_data=yes
+id=7 | images=5 | thumb_len=85374 | thumb_is_data=yes
+id=6 | images=6 | thumb_len=117110 | thumb_is_data=yes
+id=5 | images=4 | thumb_len=71486 | thumb_is_data=yes
+id=4 | images=3 | thumb_len=96462 | thumb_is_data=yes
+id=3 | images=7 | thumb_len=44 | thumb_is_data=no
+id=2 | images=8 | thumb_len=44 | thumb_is_data=no

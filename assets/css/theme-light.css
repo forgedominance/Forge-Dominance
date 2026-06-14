@@ -1,0 +1,41 @@
+/* Shared Theme System - Light Mode Overrides */
+/* This applies light theme colors to product pages when data-theme="light" */
+
+html[data-theme="light"] {
+  /* Product Pages - Light Mode Colors */
+  
+  /* Backgrounds */
+  --bg: #F9F8F6;           /* Off-white instead of deep dark */
+  --l1: #FFFFFF;           /* White instead of dark level 1 */
+  --l2: #F3F0ED;           /* Light gray instead of dark level 2 */
+  --l3: #E8E6E0;           /* Medium gray instead of dark level 3 */
+  --l4: #D9D6D0;           /* Darker gray instead of dark level 4 */
+  
+  /* Text Colors */
+  --plat: #1F1F1F;         /* Dark text instead of light */
+  --silver: #555555;       /* Medium text instead of light gray */
+  --ash: #888888;          /* Muted text instead of light gray */
+  
+  /* Brands */
+  --ember: #D4500A;        /* Keep ember (primary brand) */
+  --ember-lt: #F06020;     /* Keep light ember */
+  --ember-dk: #9A3A07;     /* Keep dark ember */
+  
+  /* Glows & Effects */
+  --glow: rgba(212, 80, 10, 0.1);
+  --glow2: rgba(212, 80, 10, 0.08);
+  
+  /* Gold Accent */
+  --gold: #C8A96E;         /* Keep gold */
+  --gold-lt: #E8C98E;      /* Keep light gold */
+  --gold-dk: #9A7B3A;      /* Keep dark gold */
+  
+  /* Borders & Subtle Elements */
+  --border-e: rgba(212, 80, 10, 0.15);
+  --faint: rgba(0, 0, 0, 0.055);
+  --faint2: rgba(0, 0, 0, 0.025);
+  --white-02: rgba(255, 255, 255, 0.02);
+}
+
+/* Admin Pages - Both Dark and Light themes already handled by admin/theme.css */
+/* Product pages will automatically apply when data-theme is set on html element */

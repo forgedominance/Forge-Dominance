@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/dashboard.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div>
+        <div class="sidebar-brand-text">
+          <h3>FORGE DOMINANCE</h3>
+          <p>Admin Panel</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Core</div>
+          <a href="dashboard.html" class="nav-link active">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="products-v2.html" class="nav-link">
+            <span class="nav-icon">📦</span>
+            <span>Products</span>
+          </a>
+          <a href="orders.html" class="nav-link">
+            <span class="nav-icon">📋</span>
+            <span>Orders</span>
+          </a>
+          <a href="analytics.html" class="nav-link">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Management</div>
+          <a href="promotions.html" class="nav-link">
+            <span class="nav-icon">🎁</span>
+            <span>Promotions</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="settings.html" class="nav-link">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </a>
+          <a href="logs.html" class="nav-link">
+            <span class="nav-icon">📝</span>
+            <span>Logs</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <h4 id="userName">Admin User</h4>
+            <p id="userRole">Super Admin</p>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="logoutBtn">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="header-title">
+        <h1>Dashboard</h1>
+        <p>Live operational overview for revenue, orders, and customer activity.</p>
+      </div>
+      <div class="header-actions">
+        <div class="refresh-chip"><span class="live-dot"></span><span id="liveStatusLabel">Live sync</span></div>
+        <div id="themeToggle" class="theme-toggle" role="button" aria-label="Toggle theme"><div class="theme-toggle-dot">☼</div></div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="dashboard-shell">
+        <section class="hero-card">
+          <div class="dashboard-topbar">
+            <div>
+              <div class="section-subtitle">Live dashboard</div>
+              <h2 class="hero-title">Track your store in real time.</h2>
+              <p class="hero-copy">This dashboard pulls directly from the live API for orders, revenue, and product counts. Charts refresh automatically so the admin view stays close to production data.</p>
+              <div class="hero-badges">
+                <span class="hero-badge" id="heroRevenueBadge">Revenue: loading...</span>
+                <span class="hero-badge" id="heroOrdersBadge">Orders: loading...</span>
+                <span class="hero-badge" id="heroProductsBadge">Products: loading...</span>
+              </div>
+            </div>
+            <div class="actions">
+              <span class="pill" id="lastUpdatedPill">Last updated: --</span>
+              <button class="btn btn-primary" id="refreshDashboardBtn">Refresh Now</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <div class="metric-card">
+            <div class="metric-label">Revenue</div>
+            <div class="metric-value" id="totalRevenue">$0.00</div>
+            <div class="metric-delta" id="revenueDelta">Live completed orders total</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Orders</div>
+            <div class="metric-value" id="totalOrders">0</div>
+            <div class="metric-delta" id="ordersDelta">All completed orders</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Products</div>
+            <div class="metric-value" id="totalProducts">0</div>
+            <div class="metric-delta" id="productsDelta">Active catalog items</div>
+          </div>
+        </section>
+
+        <section class="hero-grid">
+          <div class="chart-card">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-subtitle">Revenue trend</div>
+                <h2>Sales by day</h2>
+              </div>
+              <div class="chart-toolbar">
+                <select id="revenueRange" class="chart-filter">
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-subtitle">Order health</div>
+                <h2>Status distribution</h2>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="orderStatusChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/dashboard-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

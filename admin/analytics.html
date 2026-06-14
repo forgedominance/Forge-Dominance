@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/analytics.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div><div class="sidebar-brand-text"><h3>FORGE DOMINANCE</h3><p>Admin Panel</p></div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section"><div class="nav-section-title">Core</div><a href="/admin/dashboard.html" class="nav-link"><span class="nav-icon">📊</span><span>Dashboard</span></a><a href="/admin/products-v2.html" class="nav-link"><span class="nav-icon">📦</span><span>Products</span></a><a href="/admin/orders.html" class="nav-link"><span class="nav-icon">📋</span><span>Orders</span></a><a href="/admin/analytics.html" class="nav-link active"><span class="nav-icon">📈</span><span>Analytics</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Management</div><a href="/admin/promotions.html" class="nav-link"><span class="nav-icon">🎁</span><span>Promotions</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">System</div><a href="/admin/settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span>Settings</span></a><a href="/admin/logs.html" class="nav-link"><span class="nav-icon">📝</span><span>Logs</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">A</div><div class="user-info"><h4 id="userName">Admin User</h4><p id="userRole">Super Admin</p></div></div><button class="btn" id="logoutBtn">Sign Out</button></div>
+    </aside>
+
+    <header class="admin-header"><div class="header-title"><h1>Analytics</h1><p>Visitor analytics and tracking insights.</p></div></header>
+
+    <main class="admin-main">
+      <!-- Analytics Dashboard Cards -->
+      <section class="analytics-dashboard">
+        <div class="analytics-cards">
+          <div class="analytics-card">
+            <div class="analytics-card-icon">👁</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statTotalVisitors">--</span>
+              <span class="analytics-card-label">Total Visitors</span>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-icon">📄</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statPageViews">--</span>
+              <span class="analytics-card-label">Page Views</span>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-icon">🖱</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statActions">--</span>
+              <span class="analytics-card-label">Actions</span>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-icon">⏱</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statAvgSession">--</span>
+              <span class="analytics-card-label">Avg Session</span>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-icon">📊</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statTopPage">--</span>
+              <span class="analytics-card-label">Top Page</span>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-icon">🔄</div>
+            <div class="analytics-card-body">
+              <span class="analytics-card-value" id="statBounceRate">--</span>
+              <span class="analytics-card-label">Bounce Rate</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chart-card">
+        <div class="section-header">
+          <div class="section-title"><span class="section-subtitle">Live route</span><h2>Visitor Activity</h2></div>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <div style="display:flex;gap:0.4rem;align-items:center;">
+                <button class="btn" onclick="applySinceFilter('1h')">1h</button>
+                <button class="btn" onclick="applySinceFilter('2h')">2h</button>
+                <button class="btn" onclick="applySinceFilter('3h')">3h</button>
+                <button class="btn" onclick="applySinceFilter('4h')">4h</button>
+                <button class="btn" onclick="applySinceFilter('8h')">8h</button>
+                <button class="btn" onclick="applySinceFilter('12h')">12h</button>
+                <button class="btn" onclick="applySinceFilter('24h')">24h</button>
+                <button class="btn" onclick="applySinceFilter('7d')">7d</button>
+                <button class="btn" onclick="applySinceFilter('30d')">30d</button>
+                <button class="btn" onclick="applySinceFilter('all')">All</button>
+              </div>
+              <span class="pill" id="customersSummary">Loading...</span>
+            </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="recent-orders-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Visitor</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">IP</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Last Seen</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Page Views</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Actions</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Paths</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">View</th>
+              </tr>
+            <tbody id="customersBody"><tr><td colspan="7" style="padding:1rem;color:var(--text-tertiary);">Loading visitors...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+        <section class="per-page-stats">
+          <div id="perPageStatsContainer"></div>
+        </section>
+    </main>
+  </div>
+
+
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/analytics.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

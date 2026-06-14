@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Forge    Dominance Forge    Dominance | Forge    Dominance</title>
+<meta name="description" content="Commission a custom handcrafted hunting knife. Tell us your vision and our master craftsmen will build it to your exact specifications."/>
+<meta name="keywords" content="custom hunting knife, knife commission, bespoke hunting knife, custom forge dominance"/>
+<meta name="author" content="Forge Dominance"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://YOUR_DOMAIN.COM/pages/commission.html"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Custom Knife Commission | Forge Dominance"/>
+<meta property="og:description" content="Commission a custom handcrafted hunting knife. Tell us your vision and our master craftsmen will build it to your exact specifications."/>
+<meta property="og:image" content="https://YOUR_DOMAIN.COM/assets/images/og-image.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:url" content="https://YOUR_DOMAIN.COM/pages/commission.html"/>
+<meta property="og:site_name" content="Forge Dominance"/>
+<meta property="og:locale" content="en_US"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Custom Knife Commission | Forge Dominance"/>
+<meta name="twitter:description" content="Commission a custom handcrafted hunting knife. Tell us your vision and our master craftsmen will build it to your exact specifications."/>
+<meta name="twitter:image" content="https://YOUR_DOMAIN.COM/assets/images/og-image.jpg"/>
+<link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+<link rel="preload" href="../assets/css/colors.css" as="style">
+<link rel="preload" href="../assets/css/shared.css" as="style">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"/>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=IBM+Plex+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../assets/css/colors.css"/>
+<link rel="stylesheet" href="../assets/css/shared.css"/>
+<link rel="stylesheet" href="../assets/css/hero.css"/>
+<link rel="stylesheet" href="../assets/css/order.css"/>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur"></div><div id="cur-ring"></div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="pl-logo">FORGE<span>DOMINANCE</span></div>
+  <div class="pl-bar-wrap"><div class="pl-bar"></div></div>
+  <div class="pl-pct" id="plp">0%</div>
+</div>
+
+
+<!-- CART OVERLAY -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+
+<!-- CART PANEL -->
+<div id="cart-panel">
+  <div class="cart-head">
+    <div class="cart-title">
+      YOUR ORDER
+      <span class="cart-count" id="cartCount">0</span>
+    </div>
+    <button class="cart-close" onclick="closeCart()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2L14 14M14 2L2 14" stroke="currentColor" stroke-width="1.3"/></svg>
+    </button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect x="8" y="14" width="28" height="22" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M16 14V11a6 6 0 0112 0v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <p>Your order is empty.<br/>Explore the collection to find your blade.</p>
+    </div>
+  </div>
+  <div class="cart-foot" id="cartFoot" style="display:none">
+    <div class="cart-sub-row">
+      <span>Subtotal</span>
+      <strong id="cartSubtotal">$0</strong>
+    </div>
+    <div class="cart-sub-row">
+      <span>Shipping (USA & Canada)</span>
+      <strong style="color:var(--ember)">FREE</strong>
+    </div>
+    <div class="cart-total-row">
+      <span>Order Total</span>
+      <strong id="cartTotal">$0</strong>
+    </div>
+    <button class="cart-checkout" onclick="goToOrder()">
+      Review Your Order →
+    </button>
+    <p class="cart-note">Every knife is built to order. Our team will contact you within 2 hours to confirm specifications and delivery timeline.</p>
+  </div>
+</div>
+
+<!-- MOBILE NAV OVERLAY -->
+<div id="mob-nav">
+  <button id="mob-close" onclick="toggleNav()">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" stroke-width="1.5"/></svg>
+  </button>
+  <a href="../index.html" class="mob-link">Home</a>
+  <a href="collection.html" class="mob-link">Collection</a>
+  <a href="about.html" class="mob-link">About <em>Us</em></a>
+  <a href="../index.html#hunt-collection" class="mob-link">Hunt <em>Type</em></a>
+  <a class="mob-cta" href="commission.html">Commission Yours</a>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="../index.html" class="nav-logo">FORGE<span>DOMINANCE</span></a>
+  <ul class="nav-links">
+    <li><a href="collection.html">Collection</a></li>
+    <li><a href="../index.html#hunt-collection">Hunt Type</a></li>
+    <li><a href="about.html">About Us</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-cart-btn cart-btn-badge" onclick="openCart()" aria-label="Cart">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="7" width="12" height="9" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M6 7V5.5a3 3 0 016 0V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <span class="cart-badge" id="navCartBadge">0</span>
+    </button>
+    <a href="commission.html" class="nav-cta"><span>Commission Yours</span></a>
+    <button class="nav-ham" id="navHam" aria-label="Menu" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     HOME PAGE
+════════════════════════════════════════════ -->
+
+<div id="page-order" class="page active">
+
+<!-- ORDER HERO -->
+<div class="order-hero">
+  <div class="order-hero-inner rv">
+    <span class="tlabel">Commission Form</span>
+    <h1>Start Your <em>Commission.</em></h1>
+    <p>Share your personal details, reference image, and budget range. Our team reviews every request personally and responds with a tailored build direction within 2 hours.</p>
+    <div class="order-hero-points">
+      <span class="order-hero-point">Personal Details</span>
+      <span class="order-hero-point">Reference Image</span>
+      <span class="order-hero-point">Budget Limit</span>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER LAYOUT -->
+<div id="order-form-wrap">
+  <div class="order-layout">
+
+    <div class="oc-form-col">
+      <form id="commissionForm" class="oc-card rv-l" onsubmit="event.preventDefault();submitOrder();">
+
+        <div class="oc-sec">
+          <div class="oc-sec-head">
+            <span class="oc-sec-no">01</span>
+            <div>
+              <h3>Your Details</h3>
+              <p>Only the essential information to contact you.</p>
+            </div>
+          </div>
+          <div class="oc-grid">
+            <div class="oc-field">
+              <label>First Name *</label>
+              <input type="text" id="fname" placeholder="James" required/>
+            </div>
+            <div class="oc-field">
+              <label>Last Name *</label>
+              <input type="text" id="lname" placeholder="Calloway" required/>
+            </div>
+            <div class="oc-field">
+              <label>Email *</label>
+              <input type="email" id="email" placeholder="you@example.com" required/>
+            </div>
+            <div class="oc-field">
+              <label>Phone Number</label>
+              <div class="phone-input-group">
+                <select id="phoneCountry" class="phone-country-select" onchange="updatePhonePlaceholder()">
+                  <option value="+1|US">🇺🇸 +1</option>
+                  <option value="+1|CA">🇨🇦 +1</option>
+                  <option value="+44|GB">🇬🇧 +44</option>
+                  <option value="+61|AU">🇦🇺 +61</option>
+                  <option value="+49|DE">🇩🇪 +49</option>
+                  <option value="+33|FR">🇫🇷 +33</option>
+                  <option value="+91|IN">🇮🇳 +91</option>
+                  <option value="+27|ZA">🇿🇦 +27</option>
+                  <option value="+86|CN">🇨🇳 +86</option>
+                  <option value="+81|JP">🇯🇵 +81</option>
+                  <option value="+39|IT">🇮🇹 +39</option>
+                  <option value="+34|ES">🇪🇸 +34</option>
+                </select>
+                <input type="tel" id="phoneNumber" placeholder="(555) 000-0000" oninput="validatePhoneInput(this)" data-country="US" inputmode="numeric" autocomplete="tel"/>
+              </div>
+              <small id="phoneValidation" class="phone-validation-msg"></small>
+            </div>
+            <div class="oc-field full">
+              <label>Country / Region *</label>
+              <select id="country" required>
+                <option value="">Select your region</option>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>Europe</option>
+                <option>Australia</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="oc-sec">
+          <div class="oc-sec-head">
+            <span class="oc-sec-no">02</span>
+            <div>
+              <h3>Project Brief</h3>
+              <p>Describe what you want in a few clear lines.</p>
+            </div>
+          </div>
+          <div class="oc-grid">
+            <div class="oc-field full">
+              <label>Commission Brief *</label>
+              <textarea id="projectBrief" placeholder="Tell us your intended use, overall vibe, and any must-have details." required></textarea>
+            </div>
+            <div class="oc-field full">
+              <label>Reference Notes</label>
+              <textarea id="referenceNotes" placeholder="Optional: style cues, finish tone, shape references, or links."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="oc-sec">
+          <div class="oc-sec-head">
+            <span class="oc-sec-no">03</span>
+            <div>
+              <h3>Budget and Reference</h3>
+              <p>Set your budget ceiling and upload one reference image.</p>
+            </div>
+          </div>
+
+          <div class="oc-budget-panel">
+            <div class="oc-range-head">
+              <span>Budget Limit</span>
+              <strong id="budgetValue">$1,800</strong>
+            </div>
+            <input class="oc-range" type="range" id="budgetRange" min="300" max="5000" step="50" value="1800" oninput="setBudget(this.value)"/>
+            <div class="oc-range-scale">
+              <span>$300</span>
+              <span>$5,000+</span>
+            </div>
+            <div class="oc-meter"><div id="budgetMeterFill"></div></div>
+          </div>
+
+          <div class="oc-upload">
+            <input type="file" id="refImage" accept="image/*" onchange="handleReferenceUpload(this)" required/>
+            <label for="refImage" class="oc-upload-btn">Upload Reference Image</label>
+            <p class="oc-upload-note">High-quality side profile images help us quote faster and more accurately.</p>
+            <p class="oc-upload-name" id="refImageName">No reference image selected</p>
+          </div>
+        </div>
+
+        <button class="order-submit" type="submit">Submit Commission Request</button>
+        <p class="oc-disclaimer">No payment is taken at this stage. We send your tailored proposal first.</p>
+      </form>
+    </div>
+
+    <aside class="oc-panel-col">
+      <div class="oc-panel rv-r">
+        <div class="oc-panel-head">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <h3>Commission Snapshot</h3>
+        </div>
+
+        <div class="oc-preview-wrap">
+          <img id="refPreview" src="https://images.unsplash.com/photo-1463320898484-cdee8141c787?auto=format&fit=crop&w=900&q=80" alt="Reference preview" loading="lazy" decoding="async"/>
+          <div class="oc-preview-tag" id="refImageTag">No reference image selected</div>
+        </div>
+
+        <div class="oc-stats">
+          <div class="oc-stat"><span>Client</span><strong id="sumName">Not provided</strong></div>
+          <div class="oc-stat"><span>Email</span><strong id="sumEmail">Not provided</strong></div>
+          <div class="oc-stat"><span>Budget</span><strong id="sumBudget">$1,800</strong></div>
+        </div>
+
+        <p class="oc-note">Tip: Keep your brief focused and visual. Clear constraints produce cleaner proposals.</p>
+      </div>
+    </aside>
+
+  </div>
+</div><!-- END ORDER FORM WRAP -->
+
+<!-- SUCCESS STATE -->
+<div id="order-success">
+  <div class="suc-ico">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7 13-13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <h2>Request <em>Received.</em></h2>
+  <p>Your brief is in. Our commission desk will review your details and reference image, then send your build direction and next steps within 2 hours.</p>
+  <p id="orderSuccessMeta" class="oc-success-meta"></p>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
+    <a href="#" class="btn-p" onclick="event.preventDefault();resetOrder()">Start Another Request</a>
+    <a href="collection.html" class="btn-o">Return to Collection →</a>
+  </div>
+</div>
+
+<!-- ORDER PAGE FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="fbot" style="padding-top:1.875rem;border-top:0.0625rem solid var(--faint)">
+      <p>© 2026 Forge Dominance USA · <span data-contact-email>orders@forgedominance.com</span> · +1 (406) 555-0190</p>
+      <div class="flegal">
+        <a href="../index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</div><!-- END ORDER PAGE -->
+
+
+<script src="../assets/js/site-settings.js?v=20260613" defer></script><script src="../assets/js/age-gate.js?v=20260613" defer></script><script src="../assets/js/main.js?v=20260613" defer></script><script src="../assets/js/sticky-contact.js?v=20260613" defer></script><script src="../assets/js/tracker.js?v=20260613" defer></script></body>
+</html>

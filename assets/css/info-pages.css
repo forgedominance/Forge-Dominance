@@ -1,0 +1,333 @@
+/* Informational pages for footer destinations */
+body.info-page {
+  background:
+    radial-gradient(circle at top left, rgba(212, 80, 10, 0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(200, 169, 110, 0.07), transparent 20%),
+    linear-gradient(180deg, var(--bg), var(--bg));
+}
+
+.info-page main {
+  padding-top: 4.5rem;
+}
+
+.info-hero {
+  padding: 3rem 0 2rem;
+}
+
+.info-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+body.info-page h1,
+body.info-page h2,
+body.info-page h3,
+body.info-page h4,
+body.info-page h5,
+body.info-page h6,
+body.info-page .sec-h,
+body.info-page .info-title,
+body.info-page .info-panel h2,
+body.info-page .info-card h3,
+body.info-page .faq-item summary {
+  color: var(--ember) !important;
+}
+
+body.info-page .sec-h em,
+body.info-page .info-title em {
+  color: var(--ember) !important;
+}
+
+.info-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 0.92;
+  color: var(--ember);
+  margin: 0.55rem 0 1rem;
+}
+
+.info-lead {
+  max-width: 40rem;
+  color: var(--silver);
+  font-size: 1rem;
+  line-height: 1.85;
+  margin: 0;
+}
+
+.info-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.info-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 0.0625rem solid var(--faint);
+  background: var(--l1);
+  color: var(--silver);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.info-panel {
+  background: linear-gradient(180deg, var(--l1), var(--l2));
+  border: 0.0625rem solid var(--faint);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
+}
+
+.info-panel h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--ember);
+  margin-bottom: 0.75rem;
+}
+
+.info-facts,
+.info-list,
+.faq-list {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.info-facts li,
+.info-list li {
+  padding: 0.9rem 1rem;
+  border: 0.0625rem solid var(--faint);
+  border-radius: 0.9rem;
+  background: var(--l1);
+  color: var(--silver);
+  line-height: 1.7;
+}
+
+.info-content {
+  padding: 0 0 5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.info-card,
+.faq-item {
+  background: linear-gradient(180deg, var(--l1), var(--l2));
+  border: 0.0625rem solid var(--faint);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.24);
+}
+
+.info-card h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--ember);
+  margin-bottom: 0.75rem;
+}
+
+.info-card p,
+.info-card li,
+.faq-item p {
+  color: var(--silver);
+  font-size: 0.92rem;
+  line-height: 1.78;
+}
+
+.info-note {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-left: 0.25rem solid var(--ember);
+  background: rgba(212, 80, 10, 0.08);
+  border-radius: 0 0.875rem 0.875rem 0;
+  color: var(--silver);
+  line-height: 1.75;
+}
+
+body.info-page footer {
+  padding: 5rem 0 2.25rem;
+  background: var(--bg);
+  border-top: 0.0625rem solid var(--faint);
+}
+
+body.info-page .fg {
+  display: grid;
+  grid-template-columns: 2.4fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+body.info-page .fb {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.875rem;
+}
+
+body.info-page .fb span {
+  color: var(--ember);
+}
+
+body.info-page .fa {
+  font-size: 0.82rem;
+  color: var(--silver);
+  line-height: 1.8;
+  max-width: 18.125rem;
+}
+
+body.info-page .fc h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--ember);
+  text-transform: uppercase;
+  margin-bottom: 1.375rem;
+}
+
+body.info-page .fc ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8125rem;
+}
+
+body.info-page .fc ul a {
+  font-size: 0.83rem;
+  color: var(--silver);
+  transition: color 0.2s;
+  position: relative;
+}
+
+body.info-page .fc ul a:hover {
+  color: var(--plat);
+}
+
+body.info-page .fbot {
+  padding-top: 1.875rem;
+  border-top: 0.0625rem solid var(--faint);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+}
+
+body.info-page .fbot p {
+  font-size: 0.72rem;
+  color: var(--ash);
+  line-height: 1.6;
+}
+
+body.info-page .flegal {
+  display: flex;
+  gap: 1.375rem;
+}
+
+body.info-page .flegal a {
+  font-size: 0.7rem;
+  color: var(--ash);
+  transition: color 0.2s;
+}
+
+body.info-page .flegal a:hover {
+  color: var(--plat);
+}
+
+.faq-item summary {
+  list-style: none;
+  cursor: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  color: var(--ember);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item p {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 64rem) {
+  .info-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  body.info-page .fg {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .info-page main {
+    padding-top: 3.75rem;
+  }
+
+  .info-hero {
+    padding: 2.5rem 0 1.5rem;
+  }
+
+  .info-hero-grid,
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-title {
+    font-size: clamp(2.8rem, 10vw, 4.2rem);
+  }
+
+  .info-lead {
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .info-panel,
+  .info-card,
+  .faq-item {
+    padding: 1rem;
+    border-radius: 0.9rem;
+  }
+
+  body.info-page .fbot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.info-page .flegal {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .info-card h3 {
+    font-size: 1.55rem;
+  }
+
+  .info-panel h2 {
+    font-size: 1.55rem;
+  }
+
+  body.info-page .fg {
+    grid-template-columns: 1fr;
+  }
+}

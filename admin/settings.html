@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <title>Forge    Dominance • Forge    Dominance Forge    Dominance</title>
+  <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/settings.css?v=20260613">
+</head>
+<body onload="requireAuth();">
+  <div class="admin-container">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon"><img src="/assets/images/logo.jpg" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div><div class="sidebar-brand-text"><h3>FORGE DOMINANCE</h3><p>Admin Panel</p></div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section"><div class="nav-section-title">Core</div><a href="/admin/dashboard.html" class="nav-link"><span class="nav-icon">📊</span><span>Dashboard</span></a><a href="/admin/products-v2.html" class="nav-link"><span class="nav-icon">📦</span><span>Products</span></a><a href="/admin/orders.html" class="nav-link"><span class="nav-icon">📋</span><span>Orders</span></a><a href="/admin/analytics.html" class="nav-link"><span class="nav-icon">📈</span><span>Analytics</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Management</div><a href="/admin/promotions.html" class="nav-link"><span class="nav-icon">🎁</span><span>Promotions</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">System</div><a href="/admin/settings.html" class="nav-link active"><span class="nav-icon">⚙️</span><span>Settings</span></a><a href="/admin/logs.html" class="nav-link"><span class="nav-icon">📝</span><span>Logs</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">A</div><div class="user-info"><h4 id="userName">Admin User</h4><p id="userRole">Super Admin</p></div></div><button class="btn" id="logoutBtn">Sign Out</button></div>
+    </aside>
+
+    <header class="admin-header"><div class="header-title"><h1>Settings</h1><p>Users and access, security, and email configuration.</p></div></header>
+
+    <main class="admin-main">
+      <section class="chart-card">
+        <div class="section-header">
+          <div class="section-title"><span class="section-subtitle">Live route</span><h2>Settings</h2></div>
+          <span class="pill" id="settingsSummary">0 items</span>
+        </div>
+
+        <!-- Tabs -->
+        <div class="settings-tabs">
+          <button id="usersTab" class="nav-tab-btn active" data-tab="users">👥 Users & Roles</button>
+          <button id="emailTab" class="nav-tab-btn" data-tab="email">✉️ Email Config</button>
+          <button id="siteTab" class="nav-tab-btn" data-tab="site">🌐 Website & Contact</button>
+          <button id="securityTab" class="nav-tab-btn" data-tab="security">🔒 Security</button>
+          <button id="homepageTab" class="nav-tab-btn" data-tab="homepage">🏠 Homepage</button>
+          <button id="storeTab" class="nav-tab-btn" data-tab="store">🛒 Store</button>
+          <button id="paymentsTab" class="nav-tab-btn" data-tab="payments">💳 Payments</button>
+        </div>
+
+        <!-- Users & Roles Tab -->
+        <div id="usersContent" class="tab-content active">
+          <!-- Admin Profile Section -->
+          <div class="settings-form-card" style="margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+            <div style="position:relative;">
+              <div id="avatarPreview" style="width:5rem;height:5rem;border-radius:50%;background:var(--bg-tertiary);border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:2rem;color:var(--text-secondary);">
+                <span id="avatarLetter">A</span>
+                <img id="avatarImg" src="" alt="Avatar" style="width:100%;height:100%;object-fit:cover;display:none;">
+              </div>
+            </div>
+            <div style="flex:1;min-width:12rem;">
+              <h3 style="margin:0 0 0.25rem 0;font-size:1rem;">Admin Profile Picture</h3>
+              <p style="margin:0 0 0.75rem 0;font-size:0.82rem;color:var(--text-tertiary);">Upload a profile picture for your admin account.</p>
+              <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                <label for="avatarFileInput" class="settings-btn" style="cursor:pointer;margin:0;display:inline-block;">Choose File</label>
+                <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;">
+                <button id="uploadAvatarBtn" class="settings-btn" style="display:none;">Upload</button>
+                <span id="avatarFileName" style="font-size:0.8rem;color:var(--text-tertiary);"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Left: Create Forms -->
+            <div>
+              <div class="settings-field-group">
+                <h3 class="settings-form-card h3">Create Admin User</h3>
+                <div class="settings-form-card">
+                  <div class="settings-field-group">
+                    <label class="settings-label">EMAIL</label>
+                    <input id="userEmail" type="email" placeholder="admin@example.com" class="settings-input">
+                  </div>
+                  <div class="settings-field-group">
+                    <label class="settings-label">PASSWORD</label>
+                    <input id="userPassword" type="password" placeholder="Enter password (min 8 chars)" class="settings-input">
+                  </div>
+                  <div class="settings-field-group">
+                    <label class="settings-label">ROLE</label>
+                    <select id="newUserRole" class="settings-select">
+                      <option value="admin">Admin</option>
+                      <option value="superadmin">Super Admin</option>
+                    </select>
+                  </div>
+                  <button id="createUserBtn" class="settings-btn">Create User</button>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="settings-form-card h3">Manage Role Access</h3>
+                <div class="settings-form-card">
+                  <p class="settings-checkbox-desc">Select a role to configure which pages/features it can access:</p>
+                  <div class="settings-field-group">
+                    <label class="settings-label">SELECT ROLE</label>
+                    <select id="roleSelector" class="settings-select">
+                      <option value="">-- Choose a role --</option>
+                    </select>
+                  </div>
+                  <div id="rolePermissionsCheckboxes" class="permissions-panel">
+                    <h4>Permissions:</h4>
+                    <div class="permissions-grid">
+                      <label><input type="checkbox" value="dashboard" class="rolePermissionCheckbox"> Dashboard</label>
+                      <label><input type="checkbox" value="products" class="rolePermissionCheckbox"> Products</label>
+                      <label><input type="checkbox" value="orders" class="rolePermissionCheckbox"> Orders</label>
+                      <label><input type="checkbox" value="customers" class="rolePermissionCheckbox"> Customers</label>
+                      <label><input type="checkbox" value="promotions" class="rolePermissionCheckbox"> Promotions</label>
+                      <label><input type="checkbox" value="settings" class="rolePermissionCheckbox"> Settings</label>
+                      <label><input type="checkbox" value="logs" class="rolePermissionCheckbox"> Logs</label>
+                    </div>
+                    <button id="saveRolePermissionsBtn" class="settings-btn">Save Permissions</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Display Tables -->
+            <div>
+              <div class="settings-field-group">
+                <h3 class="settings-form-card h3">Admin Users</h3>
+                <div class="settings-table-wrapper">
+                  <table class="settings-table">
+                    <thead>
+                      <tr>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                      <tr><td colspan="3" class="table-empty">Loading users...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="settings-form-card h3">Roles</h3>
+                <div class="settings-table-wrapper">
+                  <table class="settings-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Permissions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="rolesTableBody">
+                      <tr><td colspan="2" class="table-empty">Loading roles...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Configuration Tab -->
+        <div id="emailContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">SMTP Configuration</h3>
+              <div class="settings-form-card">
+                <div class="settings-field-group">
+                  <label class="settings-label">SENDER EMAIL</label>
+                  <input id="senderEmail" type="email" placeholder="noreply@example.com" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">APP PASSWORD</label>
+                  <input id="appPassword" type="password" placeholder="••••••••••••" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">SMTP HOST</label>
+                  <input id="smtpHost" type="text" placeholder="smtp.gmail.com" class="settings-input">
+                </div>
+                <div class="settings-grid-half">
+                  <div>
+                    <label class="settings-label">SMTP PORT</label>
+                    <input id="smtpPort" type="number" value="587" class="settings-input">
+                  </div>
+                  <div>
+                    <label class="settings-label">ENCRYPTION</label>
+                    <select id="smtpEncryption" class="settings-select">
+                      <option value="TLS">TLS</option>
+                      <option value="SSL">SSL</option>
+                      <option value="NONE">None</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="settings-grid-half">
+                  <button id="testEmailBtn" class="settings-btn-outline">Test Email</button>
+                  <button id="saveEmailBtn" class="settings-btn">Save Config</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Current Configuration</h3>
+              <div id="emailSettingsDisplay" class="settings-form-card">
+                <p class="table-empty">Loading configuration...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Website & Contact Tab -->
+        <div id="siteContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Website Identity</h3>
+              <div class="settings-form-card">
+                <div class="settings-field-group">
+                  <label class="settings-label">WEBSITE NAME</label>
+                  <input id="siteName" type="text" placeholder="Forge Dominance" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">SUPPORT NAME</label>
+                  <input id="supportName" type="text" placeholder="James" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">WEBSITE LABEL</label>
+                  <input id="supportLabel" type="text" placeholder="Forge Dominance" class="settings-input">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Contact Channels</h3>
+              <div class="settings-form-card">
+                <div class="settings-field-group">
+                  <label class="settings-label">CONTACT EMAIL</label>
+                  <input id="contactEmail" type="email" placeholder="orders@forgedominance.com" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">WHATSAPP NUMBER</label>
+                  <input id="whatsappNumber" type="text" placeholder="923298399619" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">WHATSAPP MESSAGE</label>
+                  <textarea id="whatsappMessage" rows="4" placeholder="Hi Forge Dominance, I'm interested in a knife." class="settings-input"></textarea>
+                </div>
+                <button id="saveSiteBtn" class="settings-btn">Save Website Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Tab -->
+        <div id="securityContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Security Settings</h3>
+              <div class="settings-form-card">
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="require2FA" type="checkbox">
+                    <span>Enable 2-Factor Authentication</span>
+                  </label>
+                  <p class="settings-checkbox-desc">Require 2FA for all admin accounts</p>
+                </div>
+
+                <div class="settings-field-group">
+                  <label class="settings-label">2FA METHOD</label>
+                  <select id="authType" class="settings-select">
+                    <option value="email">Email (OTP)</option>
+                    <option value="authenticator">Authenticator App (TOTP)</option>
+                    <option value="both">Both Email & Authenticator</option>
+                  </select>
+                </div>
+
+                <div class="settings-field-group">
+                  <label class="settings-label">SESSION TIMEOUT (MINUTES)</label>
+                  <input id="sessionTimeout" type="number" value="30" min="5" max="1440" class="settings-input">
+                  <p class="settings-checkbox-desc">Auto-logout inactive sessions after this period (5-1440 minutes)</p>
+                </div>
+
+                <button id="saveSecurityBtn" class="settings-btn">Save Security Settings</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Security Status</h3>
+              <div class="settings-table-wrapper">
+                <table class="settings-table">
+                  <thead>
+                    <tr>
+                      <th>Setting</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="securityStatusBody">
+                    <tr>
+                      <td>2-Factor Authentication</td>
+                      <td><span id="twoFAStatus">Disabled</span></td>
+                    </tr>
+                    <tr>
+                      <td>Authentication Type</td>
+                      <td id="authTypeStatus">Email (OTP)</td>
+                    </tr>
+                    <tr>
+                      <td>Session Timeout</td>
+                      <td id="sessionTimeoutStatus">-- minutes</td>
+                    </tr>
+                    <tr>
+                      <td>Authenticator App</td>
+                      <td><span id="totpStatus">Checking...</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 class="settings-form-card h3" style="margin-top:1.5rem;">Authenticator App Setup</h3>
+              <div class="settings-form-card" id="totpSetupPanel">
+                <p class="settings-checkbox-desc" id="totpDescription">Set up Google Authenticator or any TOTP app for your account.</p>
+                <div id="totpQrContainer" style="display:none;text-align:center;margin:1rem 0;">
+                  <img id="totpQrImage" style="max-width:200px;border-radius:0.5rem;border:0.0625rem solid var(--border-light);" alt="QR Code">
+                  <p style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);">Scan with Google Authenticator, Authy, or any TOTP app</p>
+                  <div style="margin-top:0.5rem;">
+                    <label class="settings-label">MANUAL KEY</label>
+                    <input id="totpSecretDisplay" type="text" readonly class="settings-input" style="font-family:monospace;text-align:center;letter-spacing:2px;">
+                  </div>
+                  <div style="margin-top:1rem;">
+                    <label class="settings-label">VERIFY CODE FROM APP</label>
+                    <input id="totpVerifyCode" type="text" placeholder="Enter 6-digit code" class="settings-input" style="max-width:12rem;margin:0 auto;" maxlength="6">
+                    <button id="totpVerifyBtn" class="settings-btn" style="margin-top:0.5rem;">Verify & Enable</button>
+                  </div>
+                </div>
+                <div id="totpActions">
+                  <button id="totpSetupBtn" class="settings-btn" style="display:none;">Setup Authenticator</button>
+                  <button id="totpDisableBtn" class="settings-btn-outline" style="display:none;">Disable Authenticator</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Homepage Content Tab -->
+        <div id="homepageContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Hero Section</h3>
+              <div class="settings-form-card">
+                <div class="settings-field-group">
+                  <label class="settings-label">EYEBROW TEXT</label>
+                  <input id="heroEyebrow" type="text" placeholder="Hand Forged in USA · Limited Batches" class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">HEADLINE (one word per line, 3 words max)</label>
+                  <input id="heroLine1" type="text" placeholder="FORGE" class="settings-input">
+                  <input id="heroLine2" type="text" placeholder="YOUR" class="settings-input" style="margin-top:0.5rem;">
+                  <input id="heroLine3" type="text" placeholder="DOMINANCE" class="settings-input" style="margin-top:0.5rem;">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">SUBTEXT</label>
+                  <textarea id="heroSubtext" rows="3" class="settings-input" placeholder="The knife industry runs on mediocrity..."></textarea>
+                </div>
+                <button id="saveHomepageHeroBtn" class="settings-btn">Save Hero</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Stats Bar</h3>
+              <div class="settings-form-card" id="statsBarFields"></div>
+              <button id="saveHomepageStatsBtn" class="settings-btn" style="margin-top:1rem;">Save Stats</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div id="paymentsContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Stripe Configuration</h3>
+              <div class="settings-form-card">
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="stripeEnabled" type="checkbox">
+                    <span>Enable Stripe Payments</span>
+                  </label>
+                  <p class="settings-checkbox-desc">Allow customers to pay directly via Stripe checkout. When disabled, the site operates in commission-only mode.</p>
+                </div>
+
+                <div class="settings-field-group">
+                  <label class="settings-label">PUBLISHABLE KEY</label>
+                  <input id="stripePublishableKey" type="text" placeholder="pk_live_..." class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">SECRET KEY</label>
+                  <input id="stripeSecretKey" type="password" placeholder="sk_live_..." class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">WEBHOOK SECRET</label>
+                  <input id="stripeWebhookSecret" type="password" placeholder="whsec_..." class="settings-input">
+                </div>
+                <div class="settings-field-group">
+                  <label class="settings-label">CURRENCY</label>
+                  <select id="stripeCurrency" class="settings-select">
+                    <option value="usd">USD ($)</option>
+                    <option value="eur">EUR</option>
+                    <option value="gbp">GBP</option>
+                    <option value="cad">CAD</option>
+                    <option value="aud">AUD</option>
+                  </select>
+                </div>
+                <button id="savePaymentsBtn" class="settings-btn">Save Payment Settings</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Payment Status</h3>
+              <div class="settings-table-wrapper">
+                <table class="settings-table">
+                  <thead>
+                    <tr>
+                      <th>Setting</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Stripe Payments</td>
+                      <td><span id="stripeStatus">Disabled</span></td>
+                    </tr>
+                    <tr>
+                      <td>Publishable Key</td>
+                      <td id="stripePkStatus">Not configured</td>
+                    </tr>
+                    <tr>
+                      <td>Secret Key</td>
+                      <td id="stripeSkStatus">Not configured</td>
+                    </tr>
+                    <tr>
+                      <td>Webhook</td>
+                      <td id="stripeWhStatus">Not configured</td>
+                    </tr>
+                    <tr>
+                      <td>Currency</td>
+                      <td id="stripeCurrencyStatus">USD</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 class="settings-form-card h3" style="margin-top:1.5rem;">Checkout Pages</h3>
+              <div class="settings-form-card">
+                <p class="settings-checkbox-desc">Standalone checkout pages are available at:</p>
+                <div style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-secondary);">
+                  <div><strong>Cart:</strong> /pages/checkout/cart.html</div>
+                  <div style="margin-top:0.25rem;"><strong>Checkout:</strong> /pages/checkout/checkout.html</div>
+                  <div style="margin-top:0.25rem;"><strong>Success:</strong> /pages/checkout/success.html</div>
+                  <div style="margin-top:0.25rem;"><strong>Cancel:</strong> /pages/checkout/cancel.html</div>
+                </div>
+                <p class="settings-checkbox-desc" style="margin-top:0.75rem;">These pages will activate once Stripe is enabled and keys are configured.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Tab -->
+        <div id="storeContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Age Verification</h3>
+              <div class="settings-form-card">
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="ageGateEnabled" type="checkbox" checked>
+                    <span>Enable Age Verification Gate</span>
+                  </label>
+                  <p class="settings-checkbox-desc">Show an age verification popup before visitors can access the site. Required for blade/knife sales in many jurisdictions.</p>
+                </div>
+                <button id="saveStoreBtn" class="settings-btn">Save Store Settings</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="settings-form-card h3">Age Gate Status</h3>
+              <div class="settings-form-card">
+                <div class="settings-table-wrapper">
+                  <table class="settings-table">
+                    <thead>
+                      <tr>
+                        <th>Setting</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Age Verification</td>
+                        <td><span id="ageGateStatus">Enabled</span></td>
+                      </tr>
+                      <tr>
+                        <td>Minimum Age</td>
+                        <td>18 years</td>
+                      </tr>
+                      <tr>
+                        <td>Redirect (Under 18)</td>
+                        <td>google.com</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+
+  <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/settings-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/session-timeout.js" defer></script>
+</body>
+</html>

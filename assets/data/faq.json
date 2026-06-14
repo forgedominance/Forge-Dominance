@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1780565261458",
+    "question": "How high are you???",
+    "answer": "No sir its hi how are you.",
+    "open": false
+  },
+  {
+    "id": "2",
+    "question": "How long does a build take?",
+    "answer": "Timing depends on the model and finish, but we give you a realistic window before production begins and update you if anything changes.",
+    "open": false
+  },
+  {
+    "id": "3",
+    "question": "Do you ship outside the United States?",
+    "answer": "We ship to select destinations where legal and practical. Customs rules and import restrictions may apply.",
+    "open": false
+  },
+  {
+    "id": "1",
+    "question": "How do commissions work?",
+    "answer": "Choose a blade category, tell us how you hunt, and we guide you on steel, handle, and finish before the build starts.",
+    "open": true
+  },
+  {
+    "id": "4",
+    "question": "What if I need warranty help?",
+    "answer": "Send photos and the order details if you have them. We review every claim by hand and tell you the next step.",
+    "open": false
+  },
+  {
+    "id": "5",
+    "question": "Can I carry these knives everywhere?",
+    "answer": "No. Carry rules vary by location, so always check local law before traveling with a fixed blade or large folder.",
+    "open": false
+  }
+]
