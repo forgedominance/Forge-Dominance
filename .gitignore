@@ -43,6 +43,7 @@ api-tester.js
 detail.md
 detail-v2.md
 setup.bat
-setup.sh
 ARCHITECTURE.md
 backend/thumb-check.txt
+backend/migrations/
+backend/sql/
