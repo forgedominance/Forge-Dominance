@@ -57,41 +57,29 @@ cp backend/.env.example backend/.env
 nano backend/.env
 ```
 
-Fill in your secrets:
+Only 4 secrets are needed in `.env` — everything else (SMTP, Stripe, AI keys) is stored in Supabase and managed via Admin Panel > Settings:
 
 ```env
 PORT=5000
 NODE_ENV=production
 
-# Supabase
+# Supabase (from your Supabase project dashboard > Settings > API)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your-service-role-key
 
 # JWT (generate with: openssl rand -hex 32)
 JWT_SECRET=your-64-char-random-string
 JWT_REFRESH_SECRET=another-64-char-random-string
-JWT_EXPIRE=1h
-JWT_REFRESH_EXPIRE=7d
-
-# Redis (optional)
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# SMTP for order confirmations
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SENDER_EMAIL=you@gmail.com
-SMTP_APP_PASSWORD=your-app-password
 
 # Frontend URL (for CORS)
 FRONTEND_URL=https://yourdomain.com
+```
 
-# Uploads
-MAX_UPLOAD_MB=5
-
-# AI Chat (optional)
-GEMINI_API_KEY=
+Optional (app works without these):
+```env
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+CLOUDFLARE_TUNNEL_DOMAIN=
 ```
 
 ### 4. Start with PM2

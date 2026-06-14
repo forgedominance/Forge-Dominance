@@ -31,13 +31,6 @@ yarn-error.log*
 # Database
 pgdata/
 
-# Uploads (user-generated content)
-uploads/
-assets/uploads/
-assets/products/
-assets/ad/
-assets/reviews/
-
 # Docker
 docker-compose.override.yml
 
@@ -45,12 +38,11 @@ docker-compose.override.yml
 pm2-error.log
 pm2-out.log
 
-# Dev scripts & notes
+# Dev artifacts
 api-tester.js
 detail.md
 detail-v2.md
 setup.bat
 setup.sh
-*.txt
-!robots.txt
 ARCHITECTURE.md
+backend/thumb-check.txt
