@@ -72,9 +72,9 @@ body.plp-page.cx #cur-ring {
 }
 
 /* ─── SHARED .pc CARD (used on homepage + collection) ─── */
-.pc{position:relative;width:22rem;max-width:22rem;background:var(--l1);border:0.0625rem solid var(--faint);overflow:hidden;transition:border-color .4s,box-shadow .4s,transform .4s;display:flex;flex-direction:column;justify-self:center}
+.pc{position:relative;width:24rem;max-width:24rem;background:var(--l1);border:0.0625rem solid var(--faint);overflow:hidden;transition:border-color .4s,box-shadow .4s,transform .4s;display:flex;flex-direction:column;justify-self:center}
 .pc:hover{border-color:var(--border-e);box-shadow:0 2.5rem 5rem rgba(0,0,0,.55),0 0 3.125rem var(--glow);transform:translateY(-0.25rem)}
-.pc-img{height:18rem;overflow:hidden;position:relative;padding:0;background:var(--l1)}
+.pc-img{height:21rem;overflow:hidden;position:relative;padding:0;background:var(--l1)}
 .pc-img img{width:100%;height:100%;object-fit:contain;object-position:center;transition:transform .5s ease;filter:contrast(1.08) saturate(1.1) brightness(1.03)}
 .pc:hover .pc-img img{transform:scale(1.03);filter:contrast(1.12) saturate(1.15) brightness(1.05)}
 .pc-fade{display:none}
@@ -99,16 +99,16 @@ body.plp-page.cx #cur-ring {
 .pc.gold-card .pc-btn:hover{background:var(--gold);color:var(--bg)}
 @media(max-width:64rem){
   .pc{width:100%;max-width:none}
-  .pc-img{height:20rem}
+  .pc-img{height:22rem}
 }
 @media(max-width:48rem){
   .pc{width:100%;max-width:none}
-  .pc-img{height:16rem}
+  .pc-img{height:18rem}
   .pc-name{font-size:1.3rem}
 }
 @media(max-width:30rem){
   .pc{width:100%;max-width:none}
-  .pc-img{height:14rem}
+  .pc-img{height:16rem}
   .pc-body{padding:0.75rem 0.75rem 0.9rem}
   .pc-name{font-size:1.15rem}
   .pc-btn{font-size:.52rem;padding:0.35rem 0.6rem}

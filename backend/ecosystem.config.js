@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "bladesmith",
       script: "./server.js",
-      instances: 2,
+      instances: "max",
       exec_mode: "cluster",
       watch: false,
       max_memory_restart: "350M",
