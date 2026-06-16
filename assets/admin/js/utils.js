@@ -269,11 +269,15 @@ function clearFormErrors(form) {
 const PAGE_PERMISSIONS = {
   'dashboard.html': ['view_dashboard'],
   'products.html': ['manage_products'],
+  'products-v2.html': ['manage_products'],
+  'editor.html': ['manage_products'],
   'orders.html': ['manage_orders'],
   'customers.html': ['view_customers'],
   'promotions.html': ['manage_promotions'],
   'settings.html': ['manage_settings'],
-  'logs.html': ['view_logs']
+  'logs.html': ['view_logs'],
+  'analytics.html': ['view_dashboard'],
+  'chat.html': ['manage_orders']
 };
 
 function checkPageAccess(pageName) {
@@ -425,6 +429,23 @@ function initNotificationToggle() {
   actions.prepend(btn);
 }
 
+function enforcePageAccess() {
+  var currentPage = window.location.pathname.split('/').pop() || '';
+  if (currentPage === 'login.html' || !currentPage) return;
+  if (!checkPageAccess(currentPage)) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#e74c3c;"><h2>Access Denied — You do not have permission to view this page.</h2></div>';
+    return;
+  }
+  var sidebar = document.querySelector('.admin-sidebar');
+  if (!sidebar) return;
+  sidebar.querySelectorAll('a.nav-link').forEach(function(link) {
+    var href = (link.getAttribute('href') || '').split('/').pop();
+    if (href && !checkPageAccess(href)) {
+      link.style.display = 'none';
+    }
+  });
+}
+
 // Auto-initialize theme, sidebar and injected controls on every admin page
 if (typeof window !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
@@ -435,6 +456,7 @@ if (typeof window !== 'undefined') {
       ensureLiveChatSidebarLink();
       initializeUserDisplay();
       initNotificationToggle();
+      enforcePageAccess();
     } catch (e) { console.warn('admin init error', e.message); }
   });
 }

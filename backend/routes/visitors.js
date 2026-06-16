@@ -3,6 +3,7 @@ const supabase = require('../config/supabase');
 const { authenticate } = require('../middleware/auth');
 const { isMissingTableError } = require('../lib/dbUtils');
 const redis = require('../lib/redisClient');
+const visitorBuffer = require('../lib/visitorBuffer');
 
 const router = express.Router();
 
@@ -66,14 +67,8 @@ router.post('/track', async (req, res) => {
       };
     });
 
-    const { error } = await supabase.from('visitor_events').insert(payloads);
-    if (error) {
-      if (isMissingTableError(error)) {
-        payloads.forEach((p) => { try { broadcastEventToSseClients(p); } catch(e){} });
-        return res.status(201).json({ ok: true, skipped: true, count: payloads.length });
-      }
-      throw error;
-    }
+    // Buffer to local file instead of direct DB write
+    visitorBuffer.appendEvents(payloads);
 
     payloads.forEach((p) => { try { broadcastEventToSseClients(p); } catch (e) {} });
 
@@ -123,7 +118,6 @@ router.get('/events', authenticate, async (req, res) => {
     const cacheKey = `visitors:events:${limit}:${offset}:${sinceRaw}`;
 
     const result = await redis.getOrFetch(cacheKey, 30, async () => {
-      const end = offset + limit - 1;
       let cutoff = null;
       if (sinceRaw) {
         const m = sinceRaw.match(/^(\d+)(h|d|w|m)$/);
@@ -143,20 +137,26 @@ router.get('/events', authenticate, async (req, res) => {
         .from('visitor_events')
         .select('*')
         .order('created_at', { ascending: false })
-        .range(offset, end);
+        .limit(2000);
       if (cutoff) query = query.gte('created_at', cutoff);
 
-      const [eventsRes, countRes] = await Promise.all([
-        query,
-        supabase.from('visitor_events').select('*', { count: 'exact', head: true })
-      ]);
+      const eventsRes = await query;
 
-      if (eventsRes.error) {
-        if (isMissingTableError(eventsRes.error)) return { data: [], total: 0, limit, offset };
-        throw eventsRes.error;
+      if (eventsRes.error && !isMissingTableError(eventsRes.error)) throw eventsRes.error;
+
+      // Merge DB data with today's buffer
+      const dbData = eventsRes.data || [];
+      const todayEvents = visitorBuffer.readTodayEvents();
+      let merged = [...todayEvents, ...dbData];
+      if (cutoff) {
+        const cutoffTime = new Date(cutoff).getTime();
+        merged = merged.filter(e => new Date(e.created_at).getTime() >= cutoffTime);
       }
-      const total = (countRes.error && !isMissingTableError(countRes.error)) ? 0 : (countRes.count || 0);
-      return { data: eventsRes.data || [], total, limit, offset };
+      merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      const total = merged.length;
+      const sliced = merged.slice(offset, offset + limit);
+      return { data: sliced, total, limit, offset };
     });
     res.json(result);
   } catch (error) {
@@ -189,14 +189,15 @@ router.get('/summary', authenticate, async (req, res) => {
         .select('*')
         .gte('created_at', cutoff)
         .order('created_at', { ascending: false })
-        .range(0, 499);
+        .limit(2000);
 
-      if (error) {
-        if (isMissingTableError(error)) return { data: [] };
-        throw error;
-      }
+      if (error && !isMissingTableError(error)) throw error;
 
-      const allEvents = Array.isArray(data) ? data : [];
+      // Merge DB with today's buffer
+      const dbData = Array.isArray(data) ? data : [];
+      const todayEvents = visitorBuffer.readTodayEvents();
+      const cutoffTime = new Date(cutoff).getTime();
+      const allEvents = [...todayEvents, ...dbData].filter(e => new Date(e.created_at).getTime() >= cutoffTime);
       const byVisitor = new Map();
       allEvents.forEach((entry) => {
         const id = entry.visitor_id || entry.ip_address || 'unknown';
@@ -260,19 +261,25 @@ router.get('/summary-by-ip', authenticate, async (req, res) => {
 
     let query = supabase
       .from('visitor_events')
-      .select('*')
+      .select('visitor_id, ip_address, path, action, meta, created_at')
       .order('created_at', { ascending: false })
-      .range(0, 499);
+      .limit(2000);
 
     if (cutoff) query = query.gte('created_at', cutoff);
 
     const { data, error } = await query;
-    if (error) {
-      if (isMissingTableError(error)) return res.json({ data: [] });
-      throw error;
-    }
+    if (error && !isMissingTableError(error)) throw error;
 
-    const allEvents = Array.isArray(data) ? data : [];
+    // Merge Supabase data with today's local buffer
+    const dbEvents = Array.isArray(data) ? data : [];
+    const todayEvents = visitorBuffer.readTodayEvents();
+    let allEvents = [...todayEvents, ...dbEvents];
+
+    // Apply cutoff filter to merged data
+    if (cutoff) {
+      const cutoffTime = new Date(cutoff).getTime();
+      allEvents = allEvents.filter(e => new Date(e.created_at).getTime() >= cutoffTime);
+    }
 
     const byVisitorId = new Map();
     const byIp = new Map();
@@ -359,6 +366,17 @@ router.get('/summary-by-ip', authenticate, async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('[Visitors] Error:', error);
+    res.status(500).json({ error: 'An internal server error occurred' });
+  }
+});
+
+// Manual flush — push buffered data to Supabase (superadmin only)
+router.post('/flush', authenticate, async (req, res) => {
+  try {
+    const result = await visitorBuffer.flushOldFiles();
+    res.json({ ok: true, flushed: result.flushed, errors: result.errors });
+  } catch (error) {
+    console.error('[Visitors] Flush error:', error);
     res.status(500).json({ error: 'An internal server error occurred' });
   }
 });

@@ -82,10 +82,7 @@ const TokenManager = {
       email: user?.email || 'admin@forgedominance.local',
       role: user?.role || 'admin',
       name: user?.name || 'Admin User',
-      permissions: user?.permissions || [
-        'view_dashboard', 'manage_products', 'manage_orders', 
-        'view_customers', 'manage_promotions', 'manage_settings', 'view_logs'
-      ],
+      permissions: user?.permissions || [],
       ...user
     };
     this.sessionId = sessionId || null;

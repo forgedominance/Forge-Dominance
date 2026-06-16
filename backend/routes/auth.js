@@ -375,10 +375,15 @@ function normalizePermissionList(permissionValue) {
 
 function getPermissionsForRole(role, settings = {}) {
   const normalizedRole = normalizeRoleId(role);
-  // Superadmin should always receive full permission set
   const SUPERADMIN_PERMISSIONS = ['view_dashboard','manage_products','manage_orders','view_customers','manage_promotions','manage_settings','view_logs'];
-  if (!normalizedRole || normalizedRole === 'superadmin' || normalizedRole === 'admin') {
+  const ADMIN_PERMISSIONS = ['view_dashboard','manage_products','manage_orders','view_customers','manage_promotions','manage_settings'];
+
+  if (!normalizedRole || normalizedRole === 'superadmin' || normalizedRole === 'super-admin') {
     return SUPERADMIN_PERMISSIONS;
+  }
+
+  if (normalizedRole === 'admin') {
+    return ADMIN_PERMISSIONS;
   }
 
   const roles = Array.isArray(settings.roles) ? settings.roles : [];
@@ -580,12 +585,14 @@ router.post('/login',
       const accessToken = generateAccessToken(user.id, user.email, normalizedRole, expiresIn);
       const refreshToken = generateRefreshToken(user.id);
 
+      const loginNow = new Date().toISOString();
       const { data: activityRows, error: loginActivityError } = await supabase.from('admin_login_activity').insert({
         admin_id: user.id,
         email: user.email,
         ip_address: getClientIp(req),
         user_agent: req.headers['user-agent'],
-        login_time: new Date().toISOString(),
+        login_time: loginNow,
+        last_heartbeat: loginNow,
         status: 'active'
       }).select();
       if (loginActivityError && !isMissingTableError(loginActivityError)) {
@@ -861,12 +868,14 @@ router.post('/verify-2fa', async (req, res) => {
 
     otpStore.delete(tempToken);
 
+    const loginNow2 = new Date().toISOString();
     const { data: activityRows, error: activityError } = await supabase.from('admin_login_activity').insert({
       admin_id: admin.id,
       email: admin.email,
       ip_address: getClientIp(req),
       user_agent: req.headers['user-agent'],
-      login_time: new Date().toISOString(),
+      login_time: loginNow2,
+      last_heartbeat: loginNow2,
       status: 'active'
     }).select();
     if (activityError && !isMissingTableError(activityError)) {

@@ -24,6 +24,78 @@ function getClientIp(req) {
   return String(ip).replace(/^::ffff:/, '').replace(/^\[|\]$/g, '').trim();
 }
 
+// Heartbeat — update last_seen for active session
+router.post('/admin/heartbeat', authenticate, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) return res.json({ ok: true });
+
+    const { error } = await supabase
+      .from('admin_login_activity')
+      .update({ last_heartbeat: new Date().toISOString() })
+      .eq('id', sessionId)
+      .eq('status', 'active');
+
+    if (error && !isMissingTableError(error)) throw error;
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[Tracking] Heartbeat error:', error);
+    res.status(500).json({ error: 'An internal server error occurred' });
+  }
+});
+
+// Auto-expire sessions with no heartbeat within the configured timeout
+async function expireStaleSessions() {
+  try {
+    // Load configured session timeout (default 5 min = 300s)
+    let timeoutMs = 5 * 60 * 1000;
+    try {
+      const { data: row } = await supabase
+        .from('admin_settings')
+        .select('value')
+        .eq('key', 'global')
+        .limit(1)
+        .maybeSingle();
+      const storedTimeout = row?.value?.sessionTimeout;
+      if (storedTimeout && Number(storedTimeout) > 0) {
+        timeoutMs = Number(storedTimeout) * 1000;
+      }
+    } catch (_) {}
+
+    const cutoff = new Date(Date.now() - timeoutMs).toISOString();
+
+    const { data: stale, error: fetchErr } = await supabase
+      .from('admin_login_activity')
+      .select('id, login_time, last_heartbeat')
+      .eq('status', 'active')
+      .or(`last_heartbeat.is.null,last_heartbeat.lt.${cutoff}`);
+
+    if (fetchErr && !isMissingTableError(fetchErr)) return;
+    if (!stale || !stale.length) return;
+
+    for (const session of stale) {
+      // For sessions without heartbeat, only expire if login_time is also past cutoff
+      if (!session.last_heartbeat) {
+        const loginAge = Date.now() - new Date(session.login_time).getTime();
+        if (loginAge < timeoutMs) continue;
+      }
+
+      const refTime = session.last_heartbeat || session.login_time;
+      const logoutTime = refTime
+        ? new Date(new Date(refTime).getTime() + timeoutMs).toISOString()
+        : new Date().toISOString();
+      const duration = session.login_time
+        ? Math.max(0, Math.floor((new Date(logoutTime).getTime() - new Date(session.login_time).getTime()) / 1000))
+        : null;
+
+      await supabase
+        .from('admin_login_activity')
+        .update({ logout_time: logoutTime, session_duration: duration, status: 'inactive' })
+        .eq('id', session.id);
+    }
+  } catch (_) {}
+}
+
 // Track admin login
 router.post('/admin/login', authenticate, async (req, res) => {
   try {
@@ -31,6 +103,7 @@ router.post('/admin/login', authenticate, async (req, res) => {
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || null;
 
+    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from('admin_login_activity')
       .insert({
@@ -38,7 +111,8 @@ router.post('/admin/login', authenticate, async (req, res) => {
         email,
         ip_address: ip,
         user_agent: ua,
-        login_time: new Date().toISOString(),
+        login_time: now,
+        last_heartbeat: now,
         status: 'active',
         actions: []
       })
@@ -151,6 +225,7 @@ router.post('/admin/action', authenticate, async (req, res) => {
 // Get admin login history
 router.get('/admin/history', authenticate, async (req, res) => {
   try {
+    await expireStaleSessions();
     const dayOffset = typeof req.query.dayOffset !== 'undefined' ? parseInt(req.query.dayOffset, 10) : null;
 
     let query = supabase.from('admin_login_activity').select('*').order('login_time', { ascending: false }).limit(100);

@@ -658,6 +658,9 @@ let server;
   server = app.listen(PORT, () => {
     logger.info('Server started', { port: PORT, env: process.env.NODE_ENV || 'development', redis: redis.getStatus() });
     if (process.send) process.send('ready');
+
+    // Start visitor buffer auto-flush (pushes yesterday's data to Supabase every hour)
+    try { require('./lib/visitorBuffer').startAutoFlush(); } catch (e) { logger.warn('Visitor buffer auto-flush init failed', { error: e.message }); }
   });
 
   setTimeout(() => {

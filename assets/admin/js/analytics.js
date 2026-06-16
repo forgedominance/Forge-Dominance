@@ -27,8 +27,9 @@
         const ac = Number(v.actions || 0);
         totalPageViews += pv;
         totalActions += ac;
-        if (pv <= 1) singlePageVisitors++;
-        (v.paths || []).forEach(p => {
+        const paths = v.paths || [];
+        if (paths.length <= 1) singlePageVisitors++;
+        paths.forEach(p => {
           pageCounts[p] = (pageCounts[p] || 0) + 1;
         });
       });

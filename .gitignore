@@ -4,6 +4,9 @@
 .env.*.local
 backend/.env
 
+# Visitor buffer (daily files flushed to Supabase)
+data/visitor-buffer/
+
 # Node modules
 node_modules/
 

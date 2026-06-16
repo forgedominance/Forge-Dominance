@@ -122,9 +122,9 @@ const DEFAULT_SETTINGS = {
     ]
   },
   roles: [
-    { name: 'Super Admin', permission: 'full' },
-    { name: 'Operations', permission: 'orders, products, customers' },
-    { name: 'Marketing', permission: 'promotions, themes' }
+    { name: 'Super Admin', permission: 'view_dashboard, manage_products, manage_orders, view_customers, manage_promotions, manage_settings, view_logs' },
+    { name: 'Admin', permission: 'view_dashboard, manage_products, manage_orders, view_customers, manage_promotions, manage_settings' },
+    { name: 'Product Manager', permission: 'view_dashboard, manage_products, view_customers' }
   ],
   theme: 'ember-default',
   sessionTimeout: 1800,
