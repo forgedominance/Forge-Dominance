@@ -105,13 +105,17 @@ body.plp-page.cx #cur-ring {
   .pc{width:100%;max-width:none}
   .pc-img{height:18rem}
   .pc-name{font-size:1.3rem}
+  .pcard-foot .btn-p{font-size:.72rem;padding:0.6rem 1rem}
+  .pcard-foot .btn-o{font-size:.62rem;padding:0.65rem 1rem}
 }
 @media(max-width:30rem){
   .pc{width:100%;max-width:none}
   .pc-img{height:16rem}
   .pc-body{padding:0.75rem 0.75rem 0.9rem}
   .pc-name{font-size:1.15rem}
-  .pc-btn{font-size:.52rem;padding:0.35rem 0.6rem}
+  .pc-btn{font-size:.68rem;padding:0.55rem 0.9rem}
+  .pcard-foot .btn-p{font-size:.75rem;padding:0.65rem 1.1rem}
+  .pcard-foot .btn-o{font-size:.65rem;padding:0.7rem 1.1rem}
 }
 
 .pcard{position:relative;width:18.5rem;max-width:18.5rem;background:var(--l1);border:0.0625rem solid var(--faint);overflow:hidden;transition:border-color .4s,box-shadow .4s,transform .4s;display:flex;flex-direction:column;justify-self:center}

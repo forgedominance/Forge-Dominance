@@ -103,7 +103,7 @@ nav{background:rgba(5,5,5,.3);backdrop-filter:blur(0.75rem);border-bottom:0.0625
   .pc-body{padding:0.75rem 0.75rem 0.9rem}
   .pc-name{font-size:1.15rem}
   .pc-price{font-size:1.3rem}
-  .pc-btn{font-size:.52rem;padding:0.35rem 0.6rem}
+  .pc-btn{font-size:.72rem;padding:0.6rem 1rem}
   .pc-cat{font-size:.48rem}
   .cat-bar{gap:0.625rem;border-bottom:none}
   .cat-btn{padding:0.875rem 1rem;font-size:.92rem;border:0.0625rem solid var(--faint);background:var(--l1);border-radius:62.4375rem;flex:1 1 calc(33.333% - 0.625rem);min-width:0}
@@ -122,5 +122,5 @@ nav{background:rgba(5,5,5,.3);backdrop-filter:blur(0.75rem);border-bottom:0.0625
   .pc-body{padding:0.9rem 1rem 1rem}
   .pc-name{font-size:1.4rem}
   .pc-price{font-size:1.5rem}
-  .pc-btn{font-size:.6rem;padding:0.45rem 0.8rem}
+  .pc-btn{font-size:.75rem;padding:0.6rem 1rem}
 }
