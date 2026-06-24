@@ -9,6 +9,8 @@
 
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const supabase = require('./config/supabase');
 
 const PRODUCTS_DIR = path.resolve(__dirname, '../assets/products');
