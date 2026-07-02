@@ -355,6 +355,16 @@ const adminSubdomainRouting = (req, res, next) => {
   if (req.path === '/admin' || req.path.startsWith('/admin/')) {
     return next();
   }
+
+  // Allow static assets (CSS, JS, images, fonts) through without redirect
+  if (/\.(css|js|mjs|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|map)$/i.test(req.path)) {
+    return next();
+  }
+
+  // Allow API calls through without redirect (login, dashboard data, etc.)
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
   
   // For any other path on admin subdomain, determine auth status and redirect
   let isAuthenticated = false;
