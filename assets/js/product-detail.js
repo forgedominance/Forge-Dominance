@@ -520,3 +520,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   updateCartUI();
 });
+
+

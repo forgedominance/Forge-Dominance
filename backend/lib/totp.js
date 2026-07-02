@@ -58,3 +58,5 @@ function generateKeyURI(email, issuer, secret) {
 }
 
 module.exports = { generateSecret, verifyTOTP, generateKeyURI };
+
+

@@ -7,3 +7,5 @@ function isMissingTableError(error) {
 }
 
 module.exports = { isMissingTableError };
+
+

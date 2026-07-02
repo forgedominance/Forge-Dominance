@@ -23,3 +23,5 @@
       document.getElementById('faqList').innerHTML = '<p style="color:var(--silver);">Could not load FAQ. Please try again later.</p>';
     });
 })();
+
+

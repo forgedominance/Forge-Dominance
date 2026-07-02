@@ -57,3 +57,5 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_unseen ON chat_messages(conversatio
 }
 
 setup().catch(console.error);
+
+

@@ -189,3 +189,5 @@
     decide(window.getBladesmithSiteSettings ? window.getBladesmithSiteSettings() : { ageGateEnabled: false });
   }
 })();
+
+

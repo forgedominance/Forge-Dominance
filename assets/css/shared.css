@@ -25,7 +25,7 @@ body.cursor-ready #cur,body.cursor-ready #cur-ring{display:block}
 #preloader.out{opacity:0;visibility:hidden}
 .pl-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2.4rem);letter-spacing:clamp(.12em,2vw,.32em);color:var(--plat);opacity:0;animation:fade .4s .15s forwards;text-align:center;padding:0 1rem;word-break:keep-all}.pl-logo span{color:var(--ember)}
 .pl-bar-wrap{width:12.5rem;height:0.0625rem;background:var(--faint);overflow:hidden;opacity:0;animation:fade .2s .3s forwards}
-.pl-bar{height:100%;width:0;background:linear-gradient(90deg,var(--ember-dk),var(--ember),var(--ember-lt));animation:plLoad 1s .35s ease-out forwards}
+.pl-bar{height:100%;width:0;background:linear-gradient(90deg,var(--ember-dk),var(--ember),var(--ember-lt));transition:width 60ms linear}
 .pl-pct{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--silver);opacity:0;animation:fade .3s .4s forwards}
 
 #age-gate{position:fixed;inset:0;z-index:9000;background:rgba(5,5,5,.97);display:flex;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s;padding:1rem;backdrop-filter:blur(4px)}
@@ -232,7 +232,6 @@ section{padding:8rem 0}
 .page.active{display:block}
 
 @keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes plLoad{to{width:100%}}
 @keyframes sUp{from{opacity:0;transform:translateY(1.75rem)}to{opacity:1;transform:none}}
 @keyframes rvLine{from{transform:translateY(110%)}to{transform:translateY(0)}}
 @keyframes shaft{0%,100%{opacity:.25;transform:scaleY(.55)}50%{opacity:.7;transform:scaleY(1)}}

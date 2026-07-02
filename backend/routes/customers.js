@@ -12,3 +12,5 @@ router.delete('/:id', authenticate, authorize('admin'), customerController.delet
 router.post('/:id/notes', authenticate, customerController.addNote);
 
 module.exports = router;
+
+

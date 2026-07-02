@@ -23,3 +23,5 @@ const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '', {
 
 module.exports = supabase;
 module.exports.supabase = supabase;
+
+

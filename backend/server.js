@@ -194,7 +194,7 @@ app.get('/sitemap.xml', async (req, res) => {
     return;
   }
 
-  const DOMAIN = 'https://YOUR_DOMAIN.COM';
+  const DOMAIN = 'https://forgedominance.com';
   const staticPages = [
     { loc: '/', changefreq: 'weekly', priority: '1.0' },
     { loc: '/pages/collection.html', changefreq: 'daily', priority: '0.9' },
@@ -353,6 +353,11 @@ function escapeHtml(value) {
 }
 
 function getPublicBaseUrl(req) {
+  // In production, use FRONTEND_URL from environment for canonical URLs
+  if (process.env.NODE_ENV === 'production' && process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL.replace(/\/$/, '');
+  }
+  // In development, construct from request headers
   const host = req.get('host') || 'localhost';
   const isTunnel = host.endsWith('.trycloudflare.com') || host.endsWith('.cloudflare.com');
   const proto = isTunnel ? 'https' : req.protocol;
@@ -707,3 +712,5 @@ process.on('unhandledRejection', (reason) => {
 });
 
 module.exports = app;
+
+

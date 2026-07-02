@@ -11,3 +11,5 @@ router.get('/recent-orders', authenticate, dashboardController.getRecentOrders);
 router.get('/analytics', authenticate, dashboardController.getAnalytics);
 
 module.exports = router;
+
+

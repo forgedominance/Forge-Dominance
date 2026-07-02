@@ -13,4 +13,5 @@ Disallow: /logs/
 Disallow: /pages/order.html
 Disallow: /admin/login.html
 
-Sitemap: https://YOUR_DOMAIN.COM/sitemap.xml
+Sitemap: https://forgedominance.com/sitemap.xml
+

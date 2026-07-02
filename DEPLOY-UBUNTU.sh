@@ -96,7 +96,7 @@ JWT_EXPIRE=1h
 JWT_REFRESH_EXPIRE=7d
 
 # ─── FRONTEND URL (Your domain) ───
-FRONTEND_URL=https://YOUR_DOMAIN.com
+FRONTEND_URL=https://forgedominance.com
 
 # ─── REDIS ───
 REDIS_HOST=127.0.0.1
@@ -243,3 +243,4 @@ echo "  pm2 monit           - Real-time monitoring"
 echo "  systemctl status nginx - Check Nginx"
 echo "  redis-cli ping      - Check Redis"
 echo ""
+

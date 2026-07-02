@@ -1263,36 +1263,43 @@ document.addEventListener('click', function(e) {
 (function(){
   const preloadEl = document.getElementById('preloader');
   const pctEl = document.getElementById('plp');
-  if (!preloadEl || !pctEl) return;
+  const barEl = document.querySelector('.pl-bar');
+  if (!preloadEl || !pctEl || !barEl) return;
 
   let p = 0;
   let done = false;
+
+  const updateBar = () => {
+    barEl.style.width = p + '%';
+    pctEl.textContent = p + '%';
+  };
 
   const finish = () => {
     if (done) return;
     done = true;
     p = 100;
+    barEl.style.width = '100%';
     pctEl.textContent = '100%';
     preloadEl.classList.add('out');
   };
 
   const iv = setInterval(() => {
     if (done) return;
-    p = Math.min(95, p + Math.floor(Math.random() * 7) + 2);
-    pctEl.textContent = p + '%';
-  }, 90);
+    p = Math.min(95, p + Math.floor(Math.random() * 3) + 1);
+    updateBar();
+  }, 150);
 
   const onReady = () => {
     if (done) return;
     clearInterval(iv);
     const completeTimer = setInterval(() => {
-      p = Math.min(100, p + 5);
-      pctEl.textContent = p + '%';
+      p = Math.min(100, p + 2);
+      updateBar();
       if (p >= 100) {
         clearInterval(completeTimer);
         setTimeout(finish, 180);
       }
-    }, 45);
+    }, 60);
   };
 
   if (document.readyState === 'complete') {
@@ -2111,4 +2118,6 @@ function trackOrderPlace(orderId, total) {
     upgradeAll();
   }
 })();
+
+
 

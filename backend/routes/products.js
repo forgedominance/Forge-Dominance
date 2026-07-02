@@ -14,3 +14,5 @@ router.put('/:id', authenticate, authorize('admin'), productController.update);
 router.delete('/:id', authenticate, authorize('admin'), productController.delete);
 
 module.exports = router;
+
+

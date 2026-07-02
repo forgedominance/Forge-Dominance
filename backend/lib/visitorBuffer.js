@@ -100,3 +100,5 @@ function startAutoFlush() {
 }
 
 module.exports = { appendEvents, readTodayEvents, readBufferFile, listPendingFiles, flushOldFiles, startAutoFlush, BUFFER_DIR };
+
+

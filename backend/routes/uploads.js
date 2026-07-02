@@ -11,3 +11,5 @@ router.post('/upload-review-image', authenticate, authorize('admin'), uploadCont
 router.post('/upload-admin-avatar', authenticate, authorize('admin'), uploadController.uploadAdminAvatar);
 
 module.exports = router;
+
+

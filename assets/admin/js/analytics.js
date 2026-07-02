@@ -316,3 +316,5 @@
     window.applySinceFilter = applySinceFilter;
     window.viewVisitorDetails = viewVisitorDetails;
     window.loadVisitorsSummary = loadVisitorsSummary;
+
+

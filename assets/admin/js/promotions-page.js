@@ -973,3 +973,5 @@
     } else {
       initPromotionsPage();
     }
+
+

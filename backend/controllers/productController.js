@@ -159,3 +159,5 @@ const productController = {
 
 module.exports = productController;
 module.exports.VALID_CATEGORIES = VALID_CATEGORIES;
+
+

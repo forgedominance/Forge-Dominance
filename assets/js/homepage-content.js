@@ -127,3 +127,5 @@ function renderReviewCard(review, large) {
     }
   } catch (e) {}
 })();
+
+

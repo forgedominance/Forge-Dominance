@@ -3,7 +3,7 @@ const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const supabase = require('./config/supabase');
 
-const DOMAIN = 'https://YOUR_DOMAIN.COM';
+const DOMAIN = 'https://forgedominance.com';
 
 const staticPages = [
   { loc: '/', changefreq: 'weekly', priority: '1.0' },
@@ -87,3 +87,5 @@ generate().catch((err) => {
   console.error('Sitemap generation failed:', err);
   process.exit(1);
 });
+
+
