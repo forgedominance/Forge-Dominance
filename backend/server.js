@@ -10,6 +10,7 @@ const morgan = require('morgan');
 const logger = require('./lib/logger');
 const supabase = require('./config/supabase');
 const redis = require('./lib/redisClient');
+const { verifyAccessToken } = require('./config/jwt');
 const { requireAdminSubdomain } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
@@ -337,6 +338,49 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// Admin subdomain routing: Enforce that admin.forgedominance.com ONLY serves admin content
+// Non-admin paths redirect to /admin/login.html (if not authenticated) or /admin/dashboard.html (if authenticated)
+const adminSubdomainRouting = (req, res, next) => {
+  const host = (req.headers.host || '').toLowerCase().trim();
+  const hostname = host.split(':')[0];
+  
+  // Check if this is a request to the admin subdomain
+  const isAdminHost = hostname.includes('admin');
+  if (!isAdminHost) {
+    return next();
+  }
+  
+  // If path is /admin or starts with /admin/, allow it through to be handled normally
+  if (req.path === '/admin' || req.path.startsWith('/admin/')) {
+    return next();
+  }
+  
+  // For any other path on admin subdomain, determine auth status and redirect
+  let isAuthenticated = false;
+  
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    try {
+      const token = req.headers.authorization.substring(7);
+      const decoded = verifyAccessToken(token);
+      isAuthenticated = !!decoded;
+    } catch (_err) {
+      // Token verification failed, treat as not authenticated
+      isAuthenticated = false;
+    }
+  }
+  
+  // Redirect to appropriate page based on auth status
+  if (isAuthenticated) {
+    // User has valid token, redirect to admin dashboard
+    return res.redirect(302, '/admin/dashboard.html');
+  } else {
+    // User not authenticated, redirect to admin login
+    return res.redirect(302, '/admin/login.html');
+  }
+};
+
+app.use(adminSubdomainRouting);
 
 // Static file serving — works in both Docker and local development
 const assetsDir = resolveStaticDir('assets');
