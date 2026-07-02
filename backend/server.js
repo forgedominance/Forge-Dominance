@@ -5,10 +5,12 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const morgan = require('morgan');
 const logger = require('./lib/logger');
 const supabase = require('./config/supabase');
 const redis = require('./lib/redisClient');
+const { requireAdminSubdomain } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
 const ordersRoutes = require('./routes/orders');
@@ -254,6 +256,17 @@ app.use((req, res, next) => {
 
 // Middleware
 app.set('trust proxy', 1);
+
+// Apply Helmet for comprehensive security headers
+// This adds protections like X-Content-Type-Options, X-Frame-Options, CSP, HSTS, etc.
+app.use(helmet({
+  contentSecurityPolicy: false, // We have custom CSP in applySecurityHeaders
+  crossOriginResourcePolicy: { policy: 'same-origin' },
+  crossOriginOpenerPolicy: false,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
+}));
+
 const allowedOrigins = parseAllowedOrigins();
 console.log(`[CORS] Allowed origins (${process.env.NODE_ENV || 'development'}):`, allowedOrigins);
 
@@ -274,25 +287,12 @@ app.use((req, res, next) => {
       if (dynamicOrigins.includes(reqOrigin)) return callback(null, true);
 
       if (process.env.NODE_ENV === 'production') {
-        const cfDomain = String(process.env.CLOUDFLARE_TUNNEL_DOMAIN || '').trim();
-        if (cfDomain) {
-          try {
-            const parsed = new URL(reqOrigin);
-            if (parsed.hostname === cfDomain || parsed.hostname.endsWith(`.${cfDomain}`)) {
-              return callback(null, true);
-            }
-          } catch (_err) {}
-        }
-        // Allow Cloudflare quick tunnels
-        try {
-          const parsed = new URL(reqOrigin);
-          if (parsed.hostname.endsWith('.trycloudflare.com')) {
-            return callback(null, true);
-          }
-        } catch (_err) {}
+        // In production, ONLY allow origins in the dynamicOrigins list.
+        // No Cloudflare tunnels, no trycloudflare.com, no exceptions.
         return callback(new Error('Not allowed by CORS'));
       }
 
+      // In development, be permissive
       return callback(null, true);
     },
     credentials: true,
@@ -359,8 +359,8 @@ function getPublicBaseUrl(req) {
   }
   // In development, construct from request headers
   const host = req.get('host') || 'localhost';
-  const isTunnel = host.endsWith('.trycloudflare.com') || host.endsWith('.cloudflare.com');
-  const proto = isTunnel ? 'https' : req.protocol;
+  // Use https:// if x-forwarded-proto header indicates it (for proxy/tunnel setup)
+  const proto = (req.get('x-forwarded-proto') || req.protocol || 'http');
   return `${proto}://${host}`;
 }
 
@@ -522,7 +522,7 @@ if (assetsDir) {
   app.use('/assets', express.static(assetsDir, { maxAge: '1d' }));
 }
 if (adminDir) {
-  app.use('/admin', express.static(adminDir));
+  app.use('/admin', requireAdminSubdomain, express.static(adminDir));
 }
 if (pagesDir) {
   app.use('/pages', express.static(pagesDir));
@@ -569,21 +569,21 @@ app.use('/api/orders/public', ordersPublicRateLimit);
 app.use('/api/chat', chatRateLimit);
 app.use('/api/visitors/track', visitorTrackRateLimit);
 
-// Routes
+// Routes - Admin-only routes require admin subdomain
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
-app.use('/api/customers', customersRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/promotions', promotionsRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/themes', themesRoutes);
-app.use('/api/editor', editorRoutes);
-app.use('/api/visitors', visitorsRoutes);
-app.use('/api/tracking', trackingRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/uploads', uploadsRoutes);
-app.use('/api/commissions', commissionsRoutes);
+app.use('/api/customers', requireAdminSubdomain, customersRoutes);
+app.use('/api/dashboard', requireAdminSubdomain, dashboardRoutes);
+app.use('/api/promotions', requireAdminSubdomain, promotionsRoutes);
+app.use('/api/settings', requireAdminSubdomain, settingsRoutes);
+app.use('/api/themes', requireAdminSubdomain, themesRoutes);
+app.use('/api/editor', requireAdminSubdomain, editorRoutes);
+app.use('/api/visitors', requireAdminSubdomain, visitorsRoutes);
+app.use('/api/tracking', requireAdminSubdomain, trackingRoutes);
+app.use('/api/users', requireAdminSubdomain, usersRoutes);
+app.use('/api/uploads', requireAdminSubdomain, uploadsRoutes);
+app.use('/api/commissions', requireAdminSubdomain, commissionsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/faq', faqRoutes);
 app.use('/api/homepage-content', homepageContentRoutes);

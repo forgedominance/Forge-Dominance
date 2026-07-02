@@ -565,7 +565,8 @@ router.post('/login',
             );
           } catch (emailError) {
             console.error('2FA Email send failed:', emailError.message);
-            return res.status(503).json({ error: emailError.message || 'Could not send login verification code' });
+            const errMsg = process.env.NODE_ENV === 'production' ? 'Could not send login verification code' : emailError.message;
+            return res.status(503).json({ error: errMsg });
           }
 
           return res.json({

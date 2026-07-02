@@ -1,5 +1,27 @@
 const { verifyAccessToken } = require('../config/jwt');
 
+// Enforce admin requests MUST come from admin.forgedominance.com subdomain only
+const requireAdminSubdomain = (req, res, next) => {
+  const host = (req.headers.host || '').toLowerCase().trim();
+  
+  // Extract the actual hostname (without port)
+  const hostname = host.split(':')[0];
+  
+  // In production, strictly require admin.forgedominance.com
+  if (process.env.NODE_ENV === 'production') {
+    if (hostname !== 'admin.forgedominance.com') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  } else {
+    // In dev, allow localhost or admin.localhost variants for testing
+    if (!hostname.includes('admin') && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  }
+  
+  next();
+};
+
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
   
@@ -41,6 +63,6 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { authenticate, authorize };
+module.exports = { authenticate, authorize, requireAdminSubdomain };
 
 

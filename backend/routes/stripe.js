@@ -80,7 +80,8 @@ router.post('/checkout/create-session', async (req, res) => {
     });
   } catch (error) {
     console.error('[Stripe] Checkout session error:', error.message);
-    res.status(500).json({ error: error.message || 'Failed to create checkout session' });
+    const errMsg = process.env.NODE_ENV === 'production' ? 'Failed to create checkout session' : error.message;
+    res.status(500).json({ error: errMsg });
   }
 });
 
@@ -115,7 +116,8 @@ router.get('/checkout/session/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('[Stripe] Session retrieval error:', error.message);
-    res.status(500).json({ error: error.message || 'Failed to retrieve session' });
+    const errMsg = process.env.NODE_ENV === 'production' ? 'Failed to retrieve session' : error.message;
+    res.status(500).json({ error: errMsg });
   }
 });
 
@@ -158,7 +160,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     res.json({ received: true });
   } catch (error) {
     console.error('[Stripe] Webhook error:', error.message);
-    res.status(400).json({ error: error.message || 'Webhook error' });
+    const errMsg = process.env.NODE_ENV === 'production' ? 'Webhook error' : error.message;
+    res.status(400).json({ error: errMsg });
   }
 });
 
