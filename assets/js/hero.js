@@ -65,6 +65,10 @@
   function init() {
     resize();
     tick();
+    // Trigger fade-in after first frame is drawn
+    requestAnimationFrame(function() {
+      canvas.classList.add('loaded');
+    });
   }
 
   window.addEventListener('resize', resize);
