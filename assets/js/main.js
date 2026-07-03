@@ -615,12 +615,14 @@ function buildOrderWhatsAppMessage() {
   const siteName = site.siteName || 'Forge Dominance';
 
   let shareUrl;
-  const firstItemWithUrl = items.find(item => item.url);
-  if (firstItemWithUrl) {
-    const itemUrl = firstItemWithUrl.url;
-    shareUrl = itemUrl.startsWith('http') ? itemUrl : window.location.origin + (itemUrl.startsWith('/') ? itemUrl : '/' + itemUrl);
+  if (items.length === 1 && items[0].url) {
+    const idMatch = String(items[0].url).match(/[?&]id=([^&]+)/);
+    const extractedId = idMatch ? decodeURIComponent(idMatch[1]) : null;
+    shareUrl = extractedId
+      ? window.location.origin + '/pages/order.html?product=' + encodeURIComponent(extractedId)
+      : window.location.origin + '/pages/order.html';
   } else {
-    shareUrl = window.location.origin;
+    shareUrl = window.location.origin + '/pages/order.html';
   }
 
   const name = (data.firstName + ' ' + data.lastName).trim() || 'Not provided';
@@ -706,6 +708,7 @@ async function shareOrderWhatsApp() {
     const waNumber = String(site.whatsappNumber || '923298399619').replace(/[^\d]/g, '');
     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(buildOrderWhatsAppMessage())}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
+    showOrderSuccess();
   };
   if (btn) return withLoading(btn, action);
   return action();
@@ -728,11 +731,53 @@ async function shareOrderEmail() {
       : `Order Inquiry — ${items.length} Blade${items.length !== 1 ? 's' : ''} | ${siteName}`;
     const body = buildOrderEmailBody();
     window.location.href = `mailto:${site.contactEmail || 'orders@forgedominance.com'}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    showOrderSuccess();
   };
   if (btn) return withLoading(btn, action);
   return action();
 }
 
+function showOrderSuccess() {
+  const wrap = document.getElementById('order-form-wrap');
+  const success = document.getElementById('order-success');
+  if (!wrap || !success) return;
+  const items = loadCartState();
+  const data = getOrderFormData ? getOrderFormData() : {};
+  const name = ((data.firstName || '') + ' ' + (data.lastName || '')).trim();
+  const successMeta = document.getElementById('orderSuccessMeta');
+  if (successMeta) {
+    successMeta.textContent = (name ? 'Client: ' + name + ' | ' : '') + items.length + ' Item' + (items.length !== 1 ? 's' : '') + ' Sent';
+  }
+  try {
+    sessionStorage.setItem('fd_order_sent', '1');
+  } catch (e) {}
+  document.body.style.overflow = '';
+  const cartPanel = document.getElementById('cart-panel');
+  const cartOverlay = document.getElementById('cart-overlay');
+  if (cartPanel) cartPanel.classList.remove('open');
+  if (cartOverlay) cartOverlay.classList.remove('open');
+  wrap.classList.add('fade');
+  setTimeout(() => {
+    wrap.style.display = 'none';
+    success.classList.add('show');
+  }, 300);
+}
+function restoreOrderSuccessIfSent() {
+  try {
+    if (sessionStorage.getItem('fd_order_sent') === '1') {
+      const wrap = document.getElementById('order-form-wrap');
+      const success = document.getElementById('order-success');
+      if (wrap && success) {
+        wrap.style.display = 'none';
+        success.classList.add('show');
+        document.body.style.overflow = '';
+      }
+    }
+  } catch (e) {}
+}
+if (document.getElementById('order-success')) {
+  document.addEventListener('DOMContentLoaded', restoreOrderSuccessIfSent);
+}
 function resetOrder() {
   const wrap = document.getElementById('order-form-wrap');
   const success = document.getElementById('order-success');
@@ -1302,7 +1347,12 @@ document.addEventListener('click', function(e) {
     }, 60);
   };
 
-  if (document.readyState === 'complete') {
+  const isProductDetailPage = !!document.getElementById('detailRoot');
+  if (isProductDetailPage) {
+    // Product detail page loads data asynchronously after window.load fires,
+    // so wait for the explicit productDetailReady signal instead.
+    window.addEventListener('productDetailReady', onReady, { once: true });
+  } else if (document.readyState === 'complete') {
     onReady();
   } else {
     window.addEventListener('load', onReady, { once: true });

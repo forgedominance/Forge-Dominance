@@ -339,6 +339,7 @@ async function loadDetail() {
   if (!id) {
     document.getElementById('detailRoot').className = 'product-error';
     document.getElementById('detailRoot').textContent = 'Missing product id.';
+    window.dispatchEvent(new Event('productDetailReady'));
     return;
   }
 
@@ -346,11 +347,13 @@ async function loadDetail() {
   __galleryImages = pickGallery(product.images, '');
   __galleryIndex = 0;
   renderProduct(product);
+  window.dispatchEvent(new Event('productDetailReady'));
 }
 
 loadDetail().catch(function(error) {
   document.getElementById('detailRoot').className = 'product-error';
   document.getElementById('detailRoot').textContent = error.message || 'Could not load product.';
+  window.dispatchEvent(new Event('productDetailReady'));
 });
 
 try {

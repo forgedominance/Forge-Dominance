@@ -409,7 +409,8 @@ function escapeHtml(value) {
 function getPublicBaseUrl(req) {
   // In production, use FRONTEND_URL from environment for canonical URLs
   if (process.env.NODE_ENV === 'production' && process.env.FRONTEND_URL) {
-    return process.env.FRONTEND_URL.replace(/\/$/, '');
+    const firstUrl = process.env.FRONTEND_URL.split(',')[0].trim();
+    return firstUrl.replace(/\/$/, '');
   }
   // In development, construct from request headers
   const host = req.get('host') || 'localhost';
@@ -518,7 +519,7 @@ app.get('/pages/order.html', async (req, res, next) => {
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
     const baseUrl = getPublicBaseUrl(req);
     let imageUrl = `${baseUrl}/assets/images/logo.jpg`;
-    let orderTitle = 'Bladesmith — Your Order';
+    let orderTitle = 'Forge Dominance — Your Order';
     const pageUrl = `${baseUrl}/pages/order.html`;
 
     // If single product ID provided, use its thumbnail for WhatsApp preview
@@ -531,7 +532,7 @@ app.get('/pages/order.html', async (req, res, next) => {
           const img = media.image_url;
           imageUrl = img.startsWith('http') ? img : `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
         }
-        if (product?.name) orderTitle = `Bladesmith — ${product.name}`;
+        if (product?.name) orderTitle = `Forge Dominance — ${product.name}`;
       } catch (_) {}
     }
 
@@ -542,7 +543,7 @@ app.get('/pages/order.html', async (req, res, next) => {
     );
     html = html.replace(
       /<meta\s+id="og-description"\s+property="og:description"\s+content="[^"]*"\s*\/?>/i,
-      '<meta id="og-description" property="og:description" content="Review your selected blades and send your order details to Bladesmith." />'
+      '<meta id="og-description" property="og:description" content="Review your selected blades and send your order details to Forge Dominance." />'
     );
     html = html.replace(
       /<meta\s+id="og-image"\s+property="og:image"\s+content="[^"]*"\s*\/?>/i,
