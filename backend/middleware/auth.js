@@ -1,7 +1,18 @@
 const { verifyAccessToken } = require('../config/jwt');
 
 // Enforce admin requests MUST come from admin.forgedominance.com subdomain only
+const PUBLIC_SUBPATHS = [
+  /^\/public(\/|$)/,
+  /^\/track$/,
+  /^\/ads\/public$/
+];
+
 const requireAdminSubdomain = (req, res, next) => {
+  // Skip the admin-host check for known public sub-routes (settings, visitors tracking, promo ads)
+  if (PUBLIC_SUBPATHS.some((re) => re.test(req.path))) {
+    return next();
+  }
+
   const host = (req.headers.host || '').toLowerCase().trim();
   
   // Extract the actual hostname (without port)
