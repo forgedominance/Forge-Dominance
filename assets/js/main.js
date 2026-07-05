@@ -1607,6 +1607,7 @@ window.addEventListener('scroll', requestScrollWork, { passive: true });
     const shouldRun = canRunCanvas();
     if (shouldRun && !running) {
       running = true;
+      cv.classList.add('loaded');
       rafId = requestAnimationFrame(tick);
     } else if (!shouldRun && running) {
       running = false;
