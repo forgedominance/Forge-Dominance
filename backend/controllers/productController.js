@@ -51,9 +51,7 @@ const productController = {
     try {
       const cacheKey = `products:${req.params.id}`;
       const result = await redis.getOrFetch(cacheKey, CACHE_TTL, async () => {
-        const product = await Product.findById(req.params.id);
-        if (!product) return null;
-        return Product.attachImages(product);
+        return await Product.findById(req.params.id);
       });
       if (!result) return res.status(404).json({ error: 'Product not found' });
       res.json(result);
@@ -127,8 +125,7 @@ const productController = {
         return res.status(400).json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}` });
       }
       const result = await redis.getOrFetch(`products:category:${category}`, CACHE_TTL, async () => {
-        const products = await Product.getByCategory(category);
-        return Product.attachThumbnailsToProducts(products || []);
+        return await Product.getByCategory(category);
       });
       res.json(result);
     } catch (error) {

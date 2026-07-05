@@ -583,9 +583,16 @@
     let cursorRunning = false;
     let cursorRaf = 0;
 
+    let lastCursorMoveTime = 0;
+    const CURSOR_IDLE_MS = 150;
+
     document.addEventListener('mousemove', (e) => {
       mx = e.clientX;
       my = e.clientY;
+      lastCursorMoveTime = performance.now();
+      if (!cursorRaf && cursorRunning) {
+        cursorRaf = requestAnimationFrame(renderCursorRing);
+      }
       if (mouseQueued) return;
       mouseQueued = true;
       requestAnimationFrame(() => {
@@ -599,6 +606,13 @@
 
     function renderCursorRing() {
       if (!cursorRunning || !ring) return;
+      const idleFor = performance.now() - lastCursorMoveTime;
+      if (idleFor > CURSOR_IDLE_MS) {
+        ring.style.left = mx + 'px';
+        ring.style.top = my + 'px';
+        cursorRaf = 0;
+        return;
+      }
       rx += (mx - rx) * 0.14;
       ry += (my - ry) * 0.14;
       ring.style.left = rx + 'px';

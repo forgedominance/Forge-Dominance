@@ -16,9 +16,16 @@ if (!allowCursorFx) {
   var cursorRunning = false;
   var cursorRaf = 0;
 
+  var lastCursorMoveTime = 0;
+  var CURSOR_IDLE_MS = 150;
+
   document.addEventListener('mousemove', function(e) {
     mx = e.clientX;
     my = e.clientY;
+    lastCursorMoveTime = performance.now();
+    if (!cursorRaf && cursorRunning) {
+      cursorRaf = requestAnimationFrame(renderCursorRing);
+    }
     if (mouseQueued) return;
     mouseQueued = true;
     requestAnimationFrame(function() {
@@ -32,6 +39,13 @@ if (!allowCursorFx) {
 
   function renderCursorRing() {
     if (!cursorRunning || !ring) return;
+    var idleFor = performance.now() - lastCursorMoveTime;
+    if (idleFor > CURSOR_IDLE_MS) {
+      ring.style.left = mx + 'px';
+      ring.style.top = my + 'px';
+      cursorRaf = 0;
+      return;
+    }
     rx += (mx - rx) * 0.14;
     ry += (my - ry) * 0.14;
     ring.style.left = rx + 'px';
@@ -192,7 +206,7 @@ function renderProduct(product) {
   detailRoot.className = '';
   detailRoot.innerHTML = '<section class="p-detail-shell"><div class="p-detail-grid">'
     + '<div class="p-gallery"><div class="p-main-img">'
-    + '<img id="mainImg" src="' + escapeHtml(images[0] || '') + '" alt="' + escapeHtml(product.name || 'Product image') + '" />'
+    + '<img id="mainImg" src="' + escapeHtml(images[0] || '') + '" alt="' + escapeHtml(product.name || 'Product image') + '" fetchpriority="high" />'
     + '<button class="p-arrow left" onclick="prevImage()" aria-label="Previous image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>'
     + '<button class="p-arrow right" onclick="nextImage()" aria-label="Next image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>'
     + '</div><div class="p-thumbs">'

@@ -3,6 +3,7 @@
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
   if (!ctx) return;
+  if (window.innerWidth < 768 || navigator.hardwareConcurrency <= 4) { canvas.style.display = 'none'; return; }
 
   var particles = [];
   var maxParticles = 60;
