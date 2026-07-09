@@ -730,7 +730,7 @@ async function shareOrderEmail() {
       ? `Order #${lastOrderId} — ${items.length} Blade${items.length !== 1 ? 's' : ''} | ${siteName}`
       : `Order Inquiry — ${items.length} Blade${items.length !== 1 ? 's' : ''} | ${siteName}`;
     const body = buildOrderEmailBody();
-    window.location.href = `mailto:${site.contactEmail || 'orders@forgedominance.com'}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${site.contactEmail || 'forgedominance@gmail.com'}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     showOrderSuccess();
   };
   if (btn) return withLoading(btn, action);
@@ -924,7 +924,7 @@ function ensureStickyContactMarkup() {
         <span class="sc-tip">Live Chat</span>
       </button>
 
-      <a href="mailto:${(window.getBladesmithSiteSettings ? window.getBladesmithSiteSettings().contactEmail : 'orders@forgedominance.com') || 'orders@forgedominance.com'}" class="sc-fab mail">
+      <a href="mailto:${(window.getBladesmithSiteSettings ? window.getBladesmithSiteSettings().contactEmail : 'forgedominance@gmail.com') || 'forgedominance@gmail.com'}" class="sc-fab mail">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 5l10 7 10-7"/></svg>
         <span class="sc-tip">Email Us</span>
       </a>

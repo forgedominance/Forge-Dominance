@@ -43,9 +43,9 @@
     if (document.getElementById('sticky-contact')) return;
     const site = window.getBladesmithSiteSettings ? window.getBladesmithSiteSettings() : {};
     const siteName = site.siteName || 'Forge Dominance';
-    const contactEmail = site.contactEmail || 'orders@forgedominance.com';
+    const contactEmail = site.contactEmail || 'forgedominance@gmail.com';
     const whatsappNumber = String(site.whatsappNumber || '923298399619').replace(/[^\d]/g, '');
-    const whatsappMessage = site.whatsappMessage || "Hi Bladesmith, I'm interested in a knife.";
+    const whatsappMessage = site.whatsappMessage || "Hi Forge Dominance, I'm interested in a knife.";
     const supportName = site.supportName || 'James';
     document.body.insertAdjacentHTML('beforeend', `
       <div id="chat-widget">

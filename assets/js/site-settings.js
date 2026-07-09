@@ -1,7 +1,7 @@
 (function () {
   const DEFAULT_SITE_SETTINGS = {
     siteName: 'Forge Dominance',
-    contactEmail: 'orders@forgedominance.com',
+    contactEmail: 'forgedominance@gmail.com',
     whatsappNumber: '923298399619',
     whatsappMessage: "Hi Forge Dominance, I'm interested in a knife.",
     supportName: 'James',

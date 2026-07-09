@@ -129,7 +129,7 @@ async function getMailer() {
   try {
     const settingsRow = await safeMaybeSingle(supabase.from('admin_settings').select('value').eq('key', 'global').limit(1));
     const settings = settingsRow?.value || {};
-    const senderEmail = settings.senderEmail || 'orders@bladesmith.com';
+    const senderEmail = settings.senderEmail || 'forgedominance@gmail.com';
     const appPassword = settings.appPassword || '';
 
     if (!senderEmail || !appPassword) return null;
@@ -154,7 +154,7 @@ async function sendCommissionEmails(row) {
     const pdfBuffer = fs.readFileSync(pdfPath);
 
     await transporter.sendMail({
-      from: process.env.ADMIN_EMAIL_FROM || 'Bladesmith <orders@bladesmith.com>',
+      from: process.env.ADMIN_EMAIL_FROM || 'Bladesmith <forgedominance@gmail.com>',
       to: row.email,
       subject: `Bladesmith Commission Request #${row.id}`,
       text: `Thanks ${row.full_name || ''}, we received your commission request and will reply shortly.`,

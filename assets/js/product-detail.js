@@ -229,7 +229,7 @@ function renderProduct(product) {
     + '<p class="p-note">Every blade is commissioned, not purchased. We will contact you within 2 hours to discuss specifications, timeline, and a 50% deposit. No payment is taken until your build is confirmed.</p>'
     + '</div></div></section>'
     + '<section class="p-why"><div class="p-why-grid">'
-    + '<div class="p-why-img"><img src="../assets/images/workshop-forge.png" alt="Forge craftsmanship" loading="lazy" /></div>'
+    + '<div class="p-why-img"><img src="../assets/images/handshake-bladesmith-hunter.webp" alt="Forge craftsmanship" loading="lazy" /></div>'
     + '<div class="p-why-copy"><h4>Why We Don’t Offer Direct Checkout</h4>'
     + '<p>Every Forge Dominance knife is built to order by one of three craftsmen. There is no warehouse. There is no inventory. There is only steel, fire, and the specific needs of the hunter who commissioned it.</p>'
     + '<p>Direct checkout assumes you know exactly what you need without asking where you’re hunting, what you’re dressing, and how you carry. We refuse to make that assumption.</p>'
@@ -270,7 +270,7 @@ function shareProductEmail() {
   if (!product) return;
   var site = window.BladesmithSiteSettings || (window.getBladesmithSiteSettings && window.getBladesmithSiteSettings()) || {};
   var siteName = site.siteName || 'Forge Dominance';
-  var contactEmail = site.contactEmail || 'orders@forgedominance.com';
+  var contactEmail = site.contactEmail || 'forgedominance@gmail.com';
   var productUrl = window.location.href;
 
   var specs = [
