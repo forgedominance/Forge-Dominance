@@ -1,3 +1,10 @@
+function runWhenIdle(fn) {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(fn, { timeout: 2000 });
+  } else {
+    setTimeout(fn, 200);
+  }
+}
 /* ─── GLOBAL ERROR BOUNDARY ─── */
 window.addEventListener('unhandledrejection', (event) => {
   console.error('[Unhandled Promise Rejection]', event.reason);
@@ -1385,7 +1392,7 @@ document.querySelectorAll('#mob-nav .mob-link, #mob-nav .mob-cta').forEach(el =>
 });
 
 /* ─── CUSTOM CURSOR ─── */
-(() => {
+runWhenIdle(() => {
   const cur = document.getElementById('cur');
   const ring = document.getElementById('cur-ring');
   const finePointer = window.matchMedia('(pointer:fine)').matches;
@@ -1474,7 +1481,7 @@ document.querySelectorAll('#mob-nav .mob-link, #mob-nav .mob-cta').forEach(el =>
       document.body.classList.remove('cx');
     }
   }, { passive: true });
-})();
+});
 
 /* ─── NAV + PARALLAX + SCROLL WORK ─── */
 const navEl = document.getElementById('nav');
@@ -1940,6 +1947,7 @@ document.querySelectorAll('[data-count]').forEach(el => cObs.observe(el));
 
 /* ─── MAGNETIC BUTTONS ─── */
 if (window.allowCursorFx) {
+  runWhenIdle(() => {
   document.querySelectorAll('.btn-p,.btn-o,.btn-gold,.nav-cta').forEach(btn => {
     let raf = 0;
     let px = 0;
@@ -1956,10 +1964,12 @@ if (window.allowCursorFx) {
     }, { passive: true });
     btn.addEventListener('mouseleave', ()=>{ btn.style.transform=''; });
   });
+});
 }
 
 /* ─── 3D TILT CARDS ─── */
 if (window.allowCursorFx) {
+  runWhenIdle(() => {
   document.querySelectorAll('.pc,.tc').forEach(card => {
     let raf = 0;
     let px = 0;
@@ -1981,6 +1991,7 @@ if (window.allowCursorFx) {
       card.style.transform='';
       setTimeout(()=>card.style.transition='',300);
     });
+  });
   });
 }
 
@@ -2021,6 +2032,7 @@ function trackOrderPlace(orderId, total) {
 
 /* ─── CUSTOM SELECT DROPDOWNS ─── */
 (function initCustomSelects() {
+  runWhenIdle(() => {
 
   function upgrade(select) {
     if (select.dataset.upgraded) return;
@@ -2186,6 +2198,7 @@ function trackOrderPlace(orderId, total) {
   } else {
     upgradeAll();
   }
+  });
 })();
 
 
