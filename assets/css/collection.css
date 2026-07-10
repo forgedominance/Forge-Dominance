@@ -13,7 +13,9 @@ nav{background:rgba(5,5,5,.3);backdrop-filter:blur(0.75rem);border-bottom:0.0625
 
 /* ═══ HERO ═══ */
 .plp-hero{position:relative;min-height:62vh;display:flex;align-items:center;overflow:hidden;padding-top:4.5rem}
-.plp-hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(to bottom,rgba(5,5,5,.88),rgba(5,5,5,.7)),url('../images/about-hero.png') center/cover no-repeat;transform:scale(1.05)}
+.plp-hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 52% 100%,rgba(5,5,5,.4),rgba(5,5,5,.95));transform:scale(1.05)}
+#plpcv{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity 400ms ease-out}
+#plpcv.loaded{opacity:.66}
 .plp-hero-vgr{position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,transparent 60%,var(--bg) 100%)}
 .plp-hero-ct{position:relative;z-index:2;padding:0 3.25rem;width:100%;max-width:80rem;margin:0 auto}
 .plp-hero-ct .tlabel{display:block;margin-bottom:1.25rem;opacity:0;animation:sUp .6s .3s forwards}

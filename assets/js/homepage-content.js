@@ -69,7 +69,7 @@ function renderReviewCard(review, large) {
       root.style.display = 'grid';
       root.style.gridTemplateColumns = 'repeat(auto-fit, minmax(18rem, 1fr))';
       root.style.gap = '1.375rem';
-      root.innerHTML = reviews.slice(0, 6).map(function(review) { return renderReviewCard(review, false); }).join('');
+      root.style.minHeight='0';root.innerHTML = reviews.slice(0, 6).map(function(review) { return renderReviewCard(review, false); }).join('');
       return;
     }
 
@@ -78,7 +78,7 @@ function renderReviewCard(review, large) {
     root.style.gap = '1.375rem';
     var leading = reviews[0];
     var trailing = reviews.slice(1, 3);
-    root.innerHTML = renderReviewCard(leading, true) + '<div style="display:flex;flex-direction:column;gap:1.375rem">' + trailing.map(function(review) { return renderReviewCard(review, false); }).join('') + '</div>';
+    root.style.minHeight='0';root.innerHTML = renderReviewCard(leading, true) + '<div style="display:flex;flex-direction:column;gap:1.375rem">' + trailing.map(function(review) { return renderReviewCard(review, false); }).join('') + '</div>';
   } catch (error) {}
 })();
 
