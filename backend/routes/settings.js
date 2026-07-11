@@ -37,10 +37,8 @@ function rewriteBrandInHtmlFiles(newName) {
   const htmlFiles = [
     'index.html', '404.html',
     'pages/about.html', 'pages/collection.html', 'pages/commission.html',
-    'pages/order.html', 'pages/product.html', 'pages/faq.html',
-    'pages/press.html', 'pages/privacy.html', 'pages/terms.html',
-    'pages/warranty-policy.html', 'pages/akti-compliance.html',
-    'pages/blade-laws-by-state.html', 'pages/shipping-info.html',
+    'pages/order.html', 'pages/product.html',
+    'pages/privacy.html', 'pages/terms.html', 'pages/shipping-info.html',
     'pages/checkout/cart.html', 'pages/checkout/checkout.html',
     'pages/checkout/success.html', 'pages/checkout/cancel.html',
     'admin/dashboard.html', 'admin/orders.html', 'admin/customers.html',

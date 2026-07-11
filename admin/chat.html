@@ -25,7 +25,6 @@
       <div class="header-title"><h1>Live Chat</h1><p>Respond to customer messages in real time.</p></div>
       <div style="display:flex;gap:0.5rem;align-items:center;">
         <button class="btn" id="tabChatsBtn" onclick="switchMainTab('chats')" style="background:var(--primary);color:#fff;">Chats</button>
-        <button class="btn" id="tabFaqBtn" onclick="switchMainTab('faq')">FAQ Manager</button>
       </div>
     </header>
 
@@ -84,31 +83,6 @@
         </div>
       </div>
 
-      <!-- FAQ Management Panel -->
-      <div class="faq-panel" id="faqPanel">
-        <div class="faq-panel-header">
-          <h3>FAQ Questions</h3>
-          <button class="faq-add-btn" onclick="openFaqModal()">+ Add Question</button>
-        </div>
-        <div class="faq-items" id="faqItems">
-          <div class="faq-empty">Loading FAQ...</div>
-        </div>
-      </div>
-
-      <!-- FAQ Edit/Add Modal -->
-      <div class="faq-modal-overlay" id="faqModalOverlay" onclick="if(event.target===this)closeFaqModal()">
-        <div class="faq-modal">
-          <h3 id="faqModalTitle">Add FAQ Question</h3>
-          <label for="faqQuestionInput">Question</label>
-          <input type="text" id="faqQuestionInput" placeholder="Enter question...">
-          <label for="faqAnswerInput">Answer</label>
-          <textarea id="faqAnswerInput" placeholder="Enter answer..."></textarea>
-          <div class="faq-modal-btns">
-            <button onclick="closeFaqModal()">Cancel</button>
-            <button class="primary" onclick="saveFaqItem()">Save</button>
-          </div>
-        </div>
-      </div>
     </main>
   </div>
 

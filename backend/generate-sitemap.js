@@ -10,14 +10,9 @@ const staticPages = [
   { loc: '/pages/collection.html', changefreq: 'daily', priority: '0.9' },
   { loc: '/pages/commission.html', changefreq: 'monthly', priority: '0.8' },
   { loc: '/pages/about.html', changefreq: 'monthly', priority: '0.7' },
-  { loc: '/pages/faq.html', changefreq: 'monthly', priority: '0.6' },
-  { loc: '/pages/press.html', changefreq: 'monthly', priority: '0.5' },
   { loc: '/pages/privacy.html', changefreq: 'yearly', priority: '0.3' },
   { loc: '/pages/terms.html', changefreq: 'yearly', priority: '0.3' },
   { loc: '/pages/shipping-info.html', changefreq: 'yearly', priority: '0.3' },
-  { loc: '/pages/warranty-policy.html', changefreq: 'yearly', priority: '0.3' },
-  { loc: '/pages/blade-laws-by-state.html', changefreq: 'yearly', priority: '0.3' },
-  { loc: '/pages/akti-compliance.html', changefreq: 'yearly', priority: '0.3' }
 ];
 
 function toXmlDate(dateStr) {

@@ -577,16 +577,15 @@ function validateOrderForm(data) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     return { ok: false, message: 'Please enter a valid email address.' };
   }
-  // Address is not required to send an inquiry (this is a share/contact
-  // flow, not a real checkout) — collected if provided, but won't block.
+  if (!data.addressLine1 || !data.city || !data.state || !data.postalCode || !data.country) {
+    return { ok: false, message: 'Please complete your full shipping location details.' };
+  }
   return { ok: true };
 }
 
 let lastOrderId = null;
 
 async function submitOrderLead() {
-  // Validation must still block share — we need a real name/email/address
-  // to put in the WhatsApp/email message.
   const data = getOrderFormData();
   const validation = validateOrderForm(data);
   if (!validation.ok) {
@@ -600,10 +599,6 @@ async function submitOrderLead() {
     items
   };
 
-  // Saving the lead to the backend is a "nice to have" for record-keeping,
-  // not a real checkout. It must NEVER block the actual share action
-  // (mailto / WhatsApp) or the success screen — if /api/orders/public is
-  // missing, down, or errors out, we still want the inquiry to go through.
   try {
     const res = await fetch('/api/orders/public', {
       method: 'POST',
@@ -618,11 +613,12 @@ async function submitOrderLead() {
     lastOrderId = result.orderId || result.id || null;
     const orderTotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0);
     trackOrderPlace(lastOrderId || ('order-' + Date.now()), orderTotal);
+    return true;
   } catch (error) {
-    // Log only — do not alert, do not block. This is not a checkout flow.
-    console.warn('Order lead backend save failed (non-blocking):', error);
+    console.error('Order lead submission failed:', error);
+    alert('Could not save your order details. Please try again or contact support.');
+    return false;
   }
-  return true;
 }
 
 function buildOrderWhatsAppMessage() {
@@ -724,13 +720,8 @@ async function shareOrderWhatsApp() {
     const site = window.getBladesmithSiteSettings ? window.getBladesmithSiteSettings() : {};
     const waNumber = String(site.whatsappNumber || '923298399619').replace(/[^\d]/g, '');
     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(buildOrderWhatsAppMessage())}`;
-    // Show the confirmation FIRST, synchronously — same reasoning as email.
-    // wa.me links can hijack the current tab on some mobile browsers/apps
-    // instead of cleanly opening a new one, which can interrupt anything
-    // scheduled to run afterward. Committing the confirmation first means
-    // it's already done regardless of what the WhatsApp navigation does.
-    showOrderSuccess();
     window.open(waUrl, '_blank', 'noopener,noreferrer');
+    showOrderSuccess();
   };
   if (btn) return withLoading(btn, action);
   return action();
@@ -754,13 +745,6 @@ async function shareOrderEmail() {
     const body = buildOrderEmailBody();
     const mailtoUrl = `mailto:${site.contactEmail || 'forgedominance@gmail.com'}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    // Show the confirmation FIRST, synchronously, before touching mailto.
-    // Clicking a mailto link can pop an OS "choose an email app" dialog,
-    // which can blur/pause the tab and silently drop anything scheduled
-    // with setTimeout afterward. Doing the confirmation first means it's
-    // already committed regardless of what the mailto click does next.
-    showOrderSuccess();
-
     // A detached <a> click is not treated as real page navigation, so
     // unlike window.location.href it can't abort this script if the
     // browser/OS has no mailto handler registered.
@@ -774,6 +758,9 @@ async function shareOrderEmail() {
     } catch (e) {
       console.error('Failed to open mail client:', e);
     }
+
+    // Always show confirmation, regardless of whether a mail client opened.
+    setTimeout(showOrderSuccess, 50);
   };
   if (btn) return withLoading(btn, action);
   return action();
@@ -792,7 +779,6 @@ function showOrderSuccess() {
   }
   try {
     sessionStorage.setItem('fd_order_sent', '1');
-    sessionStorage.setItem('fd_order_sent_signature', getCartSignature(items));
   } catch (e) {}
   clearCart();
   document.body.style.overflow = '';
@@ -800,156 +786,21 @@ function showOrderSuccess() {
   const cartOverlay = document.getElementById('cart-overlay');
   if (cartPanel) cartPanel.classList.remove('open');
   if (cartOverlay) cartOverlay.classList.remove('open');
-  // Swap the DOM synchronously, in this same tick — no nested setTimeout.
-  // A queued timer here can get silently killed if the mailto/WhatsApp
-  // action that triggered this causes the browser to blur/pause the tab
-  // (e.g. "choose an email app" dialog), leaving the cart cleared but the
-  // form still visible. Doing it immediately removes that race entirely.
-  wrap.style.setProperty('display', 'none', 'important');
-  success.classList.add('show');
-  success.style.setProperty('display', 'flex', 'important');
-  success.style.setProperty('flex-direction', 'column', 'important');
-  success.style.setProperty('align-items', 'center', 'important');
-  success.style.setProperty('justify-content', 'center', 'important');
-  success.style.setProperty('min-height', '50vh', 'important');
-  success.style.setProperty('width', '100%', 'important');
-  success.style.setProperty('opacity', '1', 'important');
-  success.style.setProperty('visibility', 'visible', 'important');
-  success.style.setProperty('position', 'relative', 'important');
-  success.style.setProperty('z-index', '10', 'important');
-  success.style.setProperty('transform', 'none', 'important');
-  window.scrollTo(0, 0);
-  success.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  // Defensive re-assert on the next frame, in case any interruption
-  // (tab blur from mailto/wa.me, another script) raced with the change
-  // above. Cheap and idempotent if everything already applied correctly.
-  requestAnimationFrame(() => {
-    wrap.style.setProperty('display', 'none', 'important');
+  wrap.classList.add('fade');
+  setTimeout(() => {
+    wrap.style.display = 'none';
     success.classList.add('show');
-    success.style.setProperty('display', 'flex', 'important');
-  });
-  showNewOrderConfirmation();
-}
-
-function showNewOrderConfirmation() {
-  // Brand-new, self-contained confirmation banner. Built entirely with
-  // inline styles set via JS so it cannot be hidden or broken by any
-  // existing CSS rule, class conflict, or stale markup on the page.
-  const existing = document.getElementById('fd-new-order-confirmation');
-  if (existing) existing.remove();
-
-  const banner = document.createElement('div');
-  banner.id = 'fd-new-order-confirmation';
-  banner.setAttribute('style', [
-    'position: fixed',
-    'top: 0',
-    'left: 0',
-    'width: 100vw',
-    'height: 100vh',
-    'display: flex',
-    'flex-direction: column',
-    'align-items: center',
-    'justify-content: center',
-    'background: #0a0a0a',
-    'color: #F2F0EC',
-    'z-index: 999999',
-    'text-align: center',
-    'padding: 2rem',
-    'box-sizing: border-box',
-    'font-family: sans-serif',
-    // This site hides the real system cursor everywhere (it uses a custom
-    // cursor-follower element instead), which is why the mouse pointer was
-    // invisible on the banner. Force the standard OS-default arrow cursor
-    // back on for this banner and everything inside it.
-    'cursor: default'
-  ].join(';'));
-
-  const icon = document.createElement('div');
-  icon.textContent = '✓';
-  icon.setAttribute('style', 'width:4.5rem;height:4.5rem;border:2px solid #D4500A;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#D4500A;font-size:2rem;margin-bottom:1.75rem;cursor:default;');
-
-  const heading = document.createElement('h2');
-  heading.textContent = 'Message Sent.';
-  heading.setAttribute('style', 'font-size:2.5rem;margin:0 0 1rem;color:#F2F0EC;cursor:default;');
-
-  const message = document.createElement('p');
-  message.textContent = 'Your order details have been sent. Our team typically responds within 2 hours to confirm specifications, timeline, and next steps. No payment is required until your build is confirmed.';
-  message.setAttribute('style', 'font-size:1rem;color:#9A9A9A;max-width:32rem;line-height:1.7;margin:0 0 1.5rem;cursor:default;');
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close';
-  closeBtn.setAttribute('style', 'background:#D4500A;color:#fff;border:none;padding:0.9rem 2rem;font-size:1rem;cursor:pointer;border-radius:0.25rem;');
-  closeBtn.onclick = () => {
-    banner.remove();
-    // Reset the order form back to a blank state so it's ready to be
-    // filled out again if the person navigates back to it later.
-    const wrap = document.getElementById('order-form-wrap');
-    const success = document.getElementById('order-success');
-    const form = document.getElementById('orderContactForm');
-    if (wrap) {
-      wrap.style.removeProperty('display');
-      wrap.classList.remove('fade');
-    }
-    if (success) {
-      success.classList.remove('show');
-      success.style.removeProperty('display');
-      success.style.removeProperty('opacity');
-      success.style.removeProperty('visibility');
-      success.style.removeProperty('position');
-      success.style.removeProperty('z-index');
-      success.style.removeProperty('transform');
-      success.style.removeProperty('flex-direction');
-      success.style.removeProperty('align-items');
-      success.style.removeProperty('justify-content');
-      success.style.removeProperty('min-height');
-      success.style.removeProperty('width');
-    }
-    if (form) form.reset();
-    try {
-      sessionStorage.removeItem('fd_order_sent');
-      sessionStorage.removeItem('fd_order_sent_signature');
-    } catch (e) {}
-    // Send them to the homepage.
-    window.location.href = '/index.html';
-  };
-
-  banner.appendChild(icon);
-  banner.appendChild(heading);
-  banner.appendChild(message);
-  banner.appendChild(closeBtn);
-  document.body.appendChild(banner);
-}
-function getCartSignature(items) {
-  // Order-independent signature of a cart's contents, so we can tell
-  // "same order re-appearing" apart from "genuinely new/different items".
-  return items
-    .map(item => [item.name, item.steel || '', item.url || '', item.price, item.qty || 1].join('|'))
-    .sort()
-    .join('||');
+  }, 300);
 }
 function restoreOrderSuccessIfSent() {
   try {
     if (sessionStorage.getItem('fd_order_sent') === '1') {
-      const items = loadCartState();
-      const sentSignature = sessionStorage.getItem('fd_order_sent_signature') || '';
-      const currentSignature = getCartSignature(items);
-      if (items.length > 0 && currentSignature !== sentSignature) {
-        // Cart contents genuinely differ from what was already confirmed —
-        // this is a real new order, so clear the stale flags and show the form.
-        sessionStorage.removeItem('fd_order_sent');
-        sessionStorage.removeItem('fd_order_sent_signature');
-        return;
-      }
-      // Either the cart is empty, or it exactly matches the order that was
-      // just confirmed (e.g. the same products got re-added) — keep showing
-      // the confirmed success page instead of reverting to the blank form.
       const wrap = document.getElementById('order-form-wrap');
       const success = document.getElementById('order-success');
       if (wrap && success) {
         wrap.style.display = 'none';
         success.classList.add('show');
         document.body.style.overflow = '';
-        window.scrollTo(0, 0);
       }
     }
   } catch (e) {}
@@ -968,11 +819,6 @@ function resetOrder() {
   success.classList.remove('show');
   wrap.style.display = '';
   wrap.classList.remove('fade');
-
-  try {
-    sessionStorage.removeItem('fd_order_sent');
-    sessionStorage.removeItem('fd_order_sent_signature');
-  } catch (e) {}
 
   if (form) form.reset();
 

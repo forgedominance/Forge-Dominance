@@ -1,3 +1,11 @@
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        await AuthService.logout();
+        window.location.href = "/admin/login.html";
+      });
+    }
+
 /* dashboard-page.js — Admin dashboard charts and metrics */
     let revenueChartInstance = null;
     let orderStatusChartInstance = null;

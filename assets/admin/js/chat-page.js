@@ -1,3 +1,11 @@
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        await AuthService.logout();
+        window.location.href = "/admin/login.html";
+      });
+    }
+
 /* chat-page.js — Admin live chat management */
     let activeConversationId = null;
     let messagesPollInterval = null;
@@ -268,138 +276,7 @@
 
     // ===== TAB SWITCHING =====
     function switchMainTab(tab) {
-      const chatsPanel = document.getElementById('chatsPanel');
-      const faqPanel = document.getElementById('faqPanel');
-      const tabChatsBtn = document.getElementById('tabChatsBtn');
-      const tabFaqBtn = document.getElementById('tabFaqBtn');
-
-      if (tab === 'faq') {
-        chatsPanel.style.display = 'none';
-        faqPanel.classList.add('active');
-        tabChatsBtn.style.background = '';
-        tabChatsBtn.style.color = '';
-        tabFaqBtn.style.background = 'var(--primary)';
-        tabFaqBtn.style.color = '#fff';
-        loadFaqItems();
-      } else {
-        chatsPanel.style.display = '';
-        faqPanel.classList.remove('active');
-        tabFaqBtn.style.background = '';
-        tabFaqBtn.style.color = '';
-        tabChatsBtn.style.background = 'var(--primary)';
-        tabChatsBtn.style.color = '#fff';
-      }
-    }
-
-    // ===== FAQ MANAGEMENT =====
-    let faqItems = [];
-    let editingFaqId = null;
-
-    async function loadFaqItems() {
-      try {
-        const data = await apiCall('/faq');
-        faqItems = Array.isArray(data) ? data : [];
-        renderFaqItems();
-      } catch (err) {
-        document.getElementById('faqItems').innerHTML = '<div class="faq-empty">' + escapeHtml(err.message || 'Failed to load FAQ') + '</div>';
-      }
-    }
-
-    function renderFaqItems() {
-      const container = document.getElementById('faqItems');
-      if (!faqItems.length) {
-        container.innerHTML = '<div class="faq-empty">No FAQ questions yet. Click "+ Add Question" to create one.</div>';
-        return;
-      }
-
-      container.innerHTML = faqItems.map((item, idx) => '\
-        <div class="faq-card" data-id="' + escapeHtml(item.id) + '">\
-          <div class="faq-card-header">\
-            <div class="faq-card-q">' + escapeHtml(item.question) + '</div>\
-            <div class="faq-card-actions">\
-              ' + (idx > 0 ? '<button onclick="moveFaqItem(\'' + item.id + '\',\'up\')" title="Move up">&#9650;</button>' : '') + '\
-              ' + (idx < faqItems.length - 1 ? '<button onclick="moveFaqItem(\'' + item.id + '\',\'down\')" title="Move down">&#9660;</button>' : '') + '\
-              <button onclick="editFaqItem(\'' + item.id + '\')">Edit</button>\
-              <button class="delete" onclick="deleteFaqItem(\'' + item.id + '\')">Delete</button>\
-            </div>\
-          </div>\
-          <div class="faq-card-a">' + escapeHtml(item.answer) + '</div>\
-          <div class="faq-card-order">#' + (idx + 1) + '</div>\
-        </div>\
-      ').join('');
-    }
-
-    function openFaqModal(id) {
-      editingFaqId = id || null;
-      const modal = document.getElementById('faqModalOverlay');
-      const title = document.getElementById('faqModalTitle');
-      const qInput = document.getElementById('faqQuestionInput');
-      const aInput = document.getElementById('faqAnswerInput');
-
-      if (id) {
-        const item = faqItems.find(i => i.id === id);
-        title.textContent = 'Edit FAQ Question';
-        qInput.value = item?.question || '';
-        aInput.value = item?.answer || '';
-      } else {
-        title.textContent = 'Add FAQ Question';
-        qInput.value = '';
-        aInput.value = '';
-      }
-
-      modal.classList.add('active');
-      qInput.focus();
-    }
-
-    function closeFaqModal() {
-      document.getElementById('faqModalOverlay').classList.remove('active');
-      editingFaqId = null;
-    }
-
-    function editFaqItem(id) { openFaqModal(id); }
-
-    async function saveFaqItem() {
-      const question = document.getElementById('faqQuestionInput').value.trim();
-      const answer = document.getElementById('faqAnswerInput').value.trim();
-      if (!question || !answer) return;
-
-      try {
-        if (editingFaqId) {
-          await apiCall('/faq/' + editingFaqId, { method: 'PUT', body: JSON.stringify({ question, answer }) });
-        } else {
-          await apiCall('/faq', { method: 'POST', body: JSON.stringify({ question, answer }) });
-        }
-        closeFaqModal();
-        await loadFaqItems();
-      } catch (err) {
-        alert(err.message || 'Failed to save FAQ item');
-      }
-    }
-
-    async function deleteFaqItem(id) {
-      if (!confirm('Delete this FAQ question?')) return;
-      try {
-        await apiCall('/faq/' + id, { method: 'DELETE' });
-        await loadFaqItems();
-      } catch (err) {
-        alert(err.message || 'Failed to delete FAQ item');
-      }
-    }
-
-    async function moveFaqItem(id, direction) {
-      const idx = faqItems.findIndex(i => i.id === id);
-      if (idx === -1) return;
-      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-      if (newIdx < 0 || newIdx >= faqItems.length) return;
-      const temp = faqItems[idx];
-      faqItems[idx] = faqItems[newIdx];
-      faqItems[newIdx] = temp;
-      try {
-        await apiCall('/faq', { method: 'PUT', body: JSON.stringify(faqItems) });
-        renderFaqItems();
-      } catch (err) {
-        await loadFaqItems();
-      }
+      // Only the Chats panel exists now; kept as a no-op for compatibility.
     }
 
     window.switchMainTab = switchMainTab;
@@ -408,12 +285,6 @@
     window.closeConversation = closeConversation;
     window.deleteConversation = deleteConversation;
     window.sendAdminReply = sendAdminReply;
-    window.openFaqModal = openFaqModal;
-    window.closeFaqModal = closeFaqModal;
-    window.saveFaqItem = saveFaqItem;
-    window.editFaqItem = editFaqItem;
-    window.deleteFaqItem = deleteFaqItem;
-    window.moveFaqItem = moveFaqItem;
     window.filterConversations = filterConversations;
 
 

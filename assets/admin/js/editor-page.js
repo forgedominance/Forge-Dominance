@@ -105,7 +105,7 @@ function injectEditor() {
     if (link && link.href) {
       const url = new URL(link.href, frame.contentWindow.location.origin);
       const path = url.pathname.replace(/^\//, '');
-      const allowed = ['index.html','pages/collection.html','pages/product.html','pages/about.html','pages/commission.html','pages/faq.html'];
+      const allowed = ['index.html','pages/collection.html','pages/product.html','pages/about.html','pages/commission.html'];
       if (allowed.includes(path) || (path === '' && allowed.includes('index.html'))) {
         e.preventDefault();
         const file = path === '' ? 'index.html' : path;

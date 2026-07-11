@@ -1,6 +1,8 @@
 /* About page sections */
 .about-hero{position:relative;height:72vh;min-height:32.5rem;display:flex;align-items:center;overflow:hidden;padding-top:1.75rem}
-.about-hero-bg{position:absolute;inset:0;background:linear-gradient(to right,rgba(5,5,5,.92) 45%,rgba(5,5,5,.3)),url('../images/about-hero.png') center/cover no-repeat}
+.about-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,rgba(5,5,5,.4),rgba(5,5,5,.95))}
+#abcv{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity 400ms ease-out}
+#abcv.loaded{opacity:.66}
 .about-hero-vgr{position:absolute;bottom:0;left:0;right:0;height:11.25rem;background:linear-gradient(to bottom,transparent,var(--bg))}
 .about-hero-ct{position:relative;z-index:2;padding:0 3.25rem}
 .about-hero-ct .tlabel{display:block;margin-bottom:1.25rem;opacity:0;animation:sUp .6s .3s forwards}

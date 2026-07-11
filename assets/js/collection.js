@@ -397,9 +397,10 @@ async function loadCatalog() {
   renderSkeletons();
   try {
     const categories = ['Hunters', 'Camp & Trail', 'Skinning Knives', 'Folding Knives'];
-    const results = await Promise.all(categories.map(cat =>
+    const settled = await Promise.allSettled(categories.map(cat =>
       fetch(`/api/products/category/${encodeURIComponent(cat)}`).then(r => r.ok ? r.json() : [])
     ));
+    const results = settled.map(s => s.status === 'fulfilled' ? s.value : []);
     categoryOrder = [];
     Object.keys(products).forEach((key) => delete products[key]);
     results.forEach((payload, i) => {
@@ -415,11 +416,34 @@ async function loadCatalog() {
       categoryDescriptions[entry.key] = entry.description;
     });
     document.getElementById('catDesc').textContent = categoryDescriptions[activeCategory] || `Browse all products in ${categoryLabelFromKey(activeCategory)}.`;
+    prefetchAllCategoryImages();
   } catch (error) {
     console.error('[API Error] Catalog load:', error);
     document.getElementById('catDesc').textContent = 'Products loading... Please refresh if it takes too long.';
     throw error;
   }
+}
+function prefetchAllCategoryImages() {
+  const urls = new Set();
+  Object.keys(products).forEach((key) => {
+    if (key === activeCategory) return;
+    (products[key] || []).forEach((p) => { if (p.img) urls.add(p.img); });
+  });
+  const list = Array.from(urls);
+  let i = 0;
+  function loadNext(deadline) {
+    while (i < list.length && (!deadline || deadline.timeRemaining() > 0)) {
+      const img = new Image();
+      img.src = list[i];
+      i++;
+    }
+    if (i < list.length) {
+      if (window.requestIdleCallback) requestIdleCallback(loadNext);
+      else setTimeout(() => loadNext(), 200);
+    }
+  }
+  if (window.requestIdleCallback) requestIdleCallback(loadNext);
+  else setTimeout(() => loadNext(), 500);
 }
 
 function scrollToCollectionCategories() {
@@ -883,160 +907,6 @@ try {
 } catch (e) { console.debug('Tracker init error', e); }
 
 
-
-/* ─── CANVAS EMBERS (collection hero) ─── */
-(function initPlpCanvas(){
-  const cv = document.getElementById('plpcv');
-  if (!cv) return;
-  const ctx = cv.getContext('2d');
-  if (!ctx) return;
-
-  const themeColor = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const glowStart = themeColor('--ember-soft-16') || 'rgba(212,80,10,0.16)';
-  const glowMid = themeColor('--ember-soft-07') || 'rgba(212,80,10,0.07)';
-  const glowEnd = themeColor('--ember-transparent') || 'rgba(212,80,10,0)';
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hero = document.querySelector('.plp-hero');
-  let embers = [];
-  let sparks = [];
-  let t = 0;
-  let heroInView = true;
-  let running = false;
-  let rafId = 0;
-
-  if (reduceMotion) {
-    resizeCanvas();
-    drawBaseGlow();
-    return;
-  }
-
-  if (hero) {
-    const heroObserver = new IntersectionObserver(entries => {
-      heroInView = entries[0] ? entries[0].isIntersecting : true;
-      syncCanvasLoop();
-    }, { threshold: 0.02 });
-    heroObserver.observe(hero);
-  }
-
-  function makeEmber() { const p = {}; resetEmber(p); return p; }
-  function makeSpark() { const p = {}; resetSpark(p); return p; }
-
-  function resetEmber(p) {
-    p.x = Math.random() * cv.width;
-    p.y = cv.height + Math.random() * cv.height * 0.35;
-    p.r = Math.random() * 2.4 + 0.7;
-    p.vx = (Math.random() - 0.5) * 0.9;
-    p.vy = -(Math.random() * 1.55 + 0.42);
-    p.a = Math.random() * 0.55 + 0.35;
-    p.fade = Math.random() * 0.0022 + 0.0014;
-    p.h = 15 + Math.random() * 26;
-    p.wobble = Math.random() * 1.05 + 0.35;
-  }
-
-  function resetSpark(p) {
-    p.x = Math.random() * cv.width;
-    p.y = cv.height + Math.random() * cv.height * 0.15;
-    p.r = Math.random() * 1.3 + 0.4;
-    p.vx = (Math.random() - 0.5) * 1.5;
-    p.vy = -(Math.random() * 2.3 + 1.1);
-    p.a = Math.random() * 0.45 + 0.25;
-    p.fade = Math.random() * 0.006 + 0.003;
-    p.h = 20 + Math.random() * 22;
-  }
-
-  function getCounts() {
-    if (reduceMotion) return { embers: 6, sparks: 1 };
-    if (window.innerWidth <= 768) return { embers: 18, sparks: 4 };
-    return { embers: 28, sparks: 6 };
-  }
-
-  function resizeCanvas() {
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-    const counts = getCounts();
-    embers = Array.from({ length: counts.embers }, makeEmber);
-    sparks = Array.from({ length: counts.sparks }, makeSpark);
-  }
-
-  function drawBaseGlow() {
-    const glow = ctx.createRadialGradient(
-      cv.width * 0.52, cv.height * 0.95, 0,
-      cv.width * 0.52, cv.height * 0.95, Math.max(cv.width, cv.height) * 0.6
-    );
-    glow.addColorStop(0, glowStart);
-    glow.addColorStop(0.35, glowMid);
-    glow.addColorStop(0.5, 'rgba(212,80,10,0.03)');
-    glow.addColorStop(1, glowEnd);
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, cv.width, cv.height);
-  }
-
-  function canRunCanvas() {
-    return !document.hidden && heroInView;
-  }
-
-  function syncCanvasLoop() {
-    const shouldRun = canRunCanvas();
-    if (shouldRun && !running) {
-      running = true;
-      cv.classList.add('loaded');
-      rafId = requestAnimationFrame(tick);
-    } else if (!shouldRun && running) {
-      running = false;
-      cancelAnimationFrame(rafId);
-    }
-  }
-
-  function tick() {
-    if (!running) return;
-    t += 1;
-    if (t % 2 !== 0) { rafId = requestAnimationFrame(tick); return; }
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    drawBaseGlow();
-    ctx.globalCompositeOperation = 'lighter';
-
-    embers.forEach(p => {
-      p.x += p.vx + Math.sin((t + p.x) * 0.01) * p.wobble * 0.04;
-      p.y += p.vy;
-      p.a -= p.fade;
-      p.vx *= 0.995;
-      if (p.a <= 0 || p.y < -20 || p.x < -30 || p.x > cv.width + 30) resetEmber(p);
-      ctx.shadowBlur = p.r * 2;
-      ctx.shadowColor = `hsla(${p.h},100%,58%,${Math.min(1, p.a * 0.6)})`;
-      ctx.fillStyle = `hsla(${p.h},96%,62%,${p.a})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    sparks.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.a -= p.fade;
-      if (p.a <= 0 || p.y < -10 || p.x < -20 || p.x > cv.width + 20) resetSpark(p);
-      ctx.shadowBlur = p.r * 2.5;
-      ctx.shadowColor = `hsla(${p.h},100%,66%,${Math.min(1, p.a * 0.7)})`;
-      ctx.fillStyle = `hsla(${p.h},100%,70%,${p.a})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    ctx.shadowBlur = 0;
-    ctx.globalCompositeOperation = 'source-over';
-    rafId = requestAnimationFrame(tick);
-  }
-
-  resizeCanvas();
-  window.addEventListener('resize', () => { resizeCanvas(); syncCanvasLoop(); }, { passive: true });
-  document.addEventListener('visibilitychange', syncCanvasLoop);
-  if (document.readyState === 'complete') {
-    setTimeout(syncCanvasLoop, 50);
-  } else {
-    window.addEventListener('load', () => setTimeout(syncCanvasLoop, 50), { once: true });
-  }
-})();
 
 /* ─── CANVAS EMBERS (collection hero) ─── */
 (function initPlpCanvas(){

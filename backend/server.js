@@ -27,7 +27,6 @@ const usersRoutes = require('./routes/users');
 const uploadsRoutes = require('./routes/uploads');
 const commissionsRoutes = require('./routes/commissions');
 const chatRoutes = require('./routes/chat');
-const faqRoutes = require('./routes/faq');
 const homepageContentRoutes = require('./routes/homepage-content');
 const stripeRoutes = require('./routes/stripe');
 const { primeSiteSettingsCache } = require('./lib/siteSettings');
@@ -203,14 +202,9 @@ app.get('/sitemap.xml', async (req, res) => {
     { loc: '/pages/collection.html', changefreq: 'daily', priority: '0.9' },
     { loc: '/pages/commission.html', changefreq: 'monthly', priority: '0.8' },
     { loc: '/pages/about.html', changefreq: 'monthly', priority: '0.7' },
-    { loc: '/pages/faq.html', changefreq: 'monthly', priority: '0.6' },
-    { loc: '/pages/press.html', changefreq: 'monthly', priority: '0.5' },
     { loc: '/pages/privacy.html', changefreq: 'yearly', priority: '0.3' },
     { loc: '/pages/terms.html', changefreq: 'yearly', priority: '0.3' },
     { loc: '/pages/shipping-info.html', changefreq: 'yearly', priority: '0.3' },
-    { loc: '/pages/warranty-policy.html', changefreq: 'yearly', priority: '0.3' },
-    { loc: '/pages/blade-laws-by-state.html', changefreq: 'yearly', priority: '0.3' },
-    { loc: '/pages/akti-compliance.html', changefreq: 'yearly', priority: '0.3' }
   ];
 
   try {
@@ -640,7 +634,6 @@ app.use('/api/users', requireAdminSubdomain, usersRoutes);
 app.use('/api/uploads', requireAdminSubdomain, uploadsRoutes);
 app.use('/api/commissions', requireAdminSubdomain, commissionsRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/faq', faqRoutes);
 app.use('/api/homepage-content', homepageContentRoutes);
 app.use('/api/stripe', stripeRoutes);
 

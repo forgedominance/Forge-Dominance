@@ -21,16 +21,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forgedominance.com/pages/faq.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://forgedominance.com/pages/press.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://forgedominance.com/pages/privacy.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
@@ -42,21 +32,6 @@
   </url>
   <url>
     <loc>https://forgedominance.com/pages/shipping-info.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://forgedominance.com/pages/warranty-policy.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://forgedominance.com/pages/blade-laws-by-state.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://forgedominance.com/pages/akti-compliance.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

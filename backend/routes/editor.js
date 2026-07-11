@@ -112,8 +112,7 @@ const ALLOWED_FILES = [
   'pages/collection.html',
   'pages/product.html',
   'pages/about.html',
-  'pages/commission.html',
-  'pages/faq.html'
+  'pages/commission.html'
 ];
 
 function isAllowedFile(file) {

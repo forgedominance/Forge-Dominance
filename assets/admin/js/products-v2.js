@@ -1,3 +1,11 @@
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        await AuthService.logout();
+        window.location.href = "/admin/login.html";
+      });
+    }
+
 // admin/products-v2.js
 // Externalized script for admin/products-v2.html
 // Depends on /admin/api-service.js (TokenManager, ProductsService, UploadsService, requireAuth)
