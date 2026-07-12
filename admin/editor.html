@@ -28,11 +28,6 @@
     <div class="ed-toolbar">
       <select id="pageSelect">
         <option value="">Select Page...</option>
-        <option value="index.html">Homepage</option>
-        <option value="pages/collection.html">Collection</option>
-        <option value="pages/product.html">Product</option>
-        <option value="pages/about.html">About</option>
-        <option value="pages/commission.html">Commission</option>
       </select>
       <div class="ed-sep"></div>
       <button class="ed-btn" id="undoBtn" title="Undo (Ctrl+Z)">&#8630; Undo</button>
@@ -63,10 +58,7 @@
         </div>
         <div class="ed-panel-section">
           <div class="ed-panel-title">Quick Load</div>
-          <div class="ed-section-item" style="cursor:pointer" onclick="loadPage('index.html')">Homepage</div>
-          <div class="ed-section-item" style="cursor:pointer" onclick="loadPage('pages/collection.html')">Collection</div>
-          <div class="ed-section-item" style="cursor:pointer" onclick="loadPage('pages/about.html')">About</div>
-          <div class="ed-section-item" style="cursor:pointer" onclick="loadPage('pages/commission.html')">Commission</div>
+          <div id="quickLoadList"></div>
         </div>
       </div>
 

@@ -445,6 +445,12 @@ const OrdersService = {
     return apiCall(`/orders/${id}`, {
       method: 'DELETE'
     });
+  },
+
+  async deleteAll() {
+    return apiCall(`/orders/all`, {
+      method: 'DELETE'
+    });
   }
 };
 

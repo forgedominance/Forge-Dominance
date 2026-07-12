@@ -107,23 +107,58 @@ const ROOT_DIR = path.resolve(__dirname, '..', '..');
 const BACKUP_DIR = path.join(ROOT_DIR, 'backups', 'editor');
 fs.mkdirSync(BACKUP_DIR, { recursive: true });
 
-const ALLOWED_FILES = [
-  'index.html',
-  'pages/collection.html',
-  'pages/product.html',
-  'pages/about.html',
-  'pages/commission.html'
-];
+function scanEditablePages() {
+  const files = ['index.html'];
+  function walk(dir, relBase) {
+    let entries;
+    try {
+      entries = fs.readdirSync(path.join(ROOT_DIR, dir), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const rel = relBase ? `${relBase}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        walk(`${dir}/${entry.name}`, rel);
+      } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.html')) {
+        files.push(`pages/${rel}`);
+      }
+    }
+  }
+  walk('pages', '');
+  return files;
+}
 
 function isAllowedFile(file) {
   const clean = String(file || '').replace(/\\/g, '/').replace(/^\/+/, '');
-  return ALLOWED_FILES.includes(clean);
+  return scanEditablePages().includes(clean);
+}
+
+function labelForFile(file) {
+  if (file === 'index.html') return 'Homepage';
+  const base = file.replace(/^pages\//, '').replace(/\.html$/, '');
+  return base
+    .split('/')
+    .map(seg => seg.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+    .join(' / ');
 }
 
 function resolveFilePath(file) {
   const clean = String(file || '').replace(/\\/g, '/').replace(/^\/+/, '');
   return path.join(ROOT_DIR, clean);
 }
+
+// GET /api/editor/pages — list all editable pages, scanned live from disk
+router.get('/pages', authenticate, (req, res) => {
+  try {
+    const files = scanEditablePages();
+    const pagesList = files.map(file => ({ file, label: labelForFile(file) }));
+    res.json({ pages: pagesList });
+  } catch (error) {
+    console.error('[Editor] List error:', error);
+    res.status(500).json({ error: 'Failed to list pages' });
+  }
+});
 
 // GET /api/editor/page?file=index.html — read HTML from disk
 router.get('/page', authenticate, (req, res) => {

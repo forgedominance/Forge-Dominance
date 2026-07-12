@@ -22,30 +22,73 @@ function edToast(msg, type) {
   setTimeout(() => el.remove(), 3500);
 }
 
+// Dynamically loaded list of editable pages (file + label), fetched from backend
+let editablePages = [];
+
+async function loadEditablePagesList() {
+  try {
+    const res = await fetch('/api/editor/pages', { headers: { ...TokenManager.getAuthHeader() } });
+    const data = await res.json();
+    editablePages = Array.isArray(data.pages) ? data.pages : [];
+
+    pageSelect.innerHTML = '<option value="">Select Page...</option>' +
+      editablePages.map(p => `<option value="${p.file}">${p.label}</option>`).join('');
+
+    const quickLoadList = document.getElementById('quickLoadList');
+    if (quickLoadList) {
+      quickLoadList.innerHTML = editablePages.map(p =>
+        `<div class="ed-section-item" style="cursor:pointer" onclick="loadPage('${p.file}')">${p.label}</div>`
+      ).join('');
+    }
+  } catch (e) {
+    edToast('Failed to load page list', 'error');
+  }
+}
+loadEditablePagesList();
+
 // Load page by setting iframe src to actual URL so all CSS/JS/images load properly
 pageSelect.addEventListener('change', () => { if (pageSelect.value) loadPage(pageSelect.value); });
 
-function loadPage(file) {
+async function loadPage(file) {
   currentFile = file;
   pageSelect.value = file;
   document.getElementById('edPlaceholder').classList.add('hidden');
-  // Load as real URL so all resources (CSS, images, JS) work
-  frame.src = '/' + file;
-  frame.onload = () => {
-    try {
-      // Store original for reference
-      originalHtml = '<!DOCTYPE html>\n' + frame.contentDocument.documentElement.outerHTML;
-      injectEditor();
-      history = [originalHtml];
-      historyIdx = 0;
-      unsaved = false;
-      saveBtn.classList.remove('unsaved');
-      updateUndoRedo();
-      edToast('Loaded: ' + file, 'info');
-    } catch(e) {
-      edToast('Failed to access page frame', 'error');
+  try {
+    // Fetch real page HTML via authenticated API (bypasses admin-subdomain routing block)
+    const res = await fetch('/api/editor/page?file=' + encodeURIComponent(file), {
+      headers: { ...TokenManager.getAuthHeader() }
+    });
+    if (!res.ok) throw new Error('Failed to fetch page (' + res.status + ')');
+    const data = await res.json();
+    let html = data.html || '';
+
+    // Inject <base href="/"> so relative asset paths (e.g. "assets/css/x.css")
+    // resolve against the admin subdomain's root instead of the srcdoc's
+    // implicit base (the editor.html URL). Same-origin, so no CSP issues.
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, '<head$1><base href="/">');
+    } else {
+      html = '<base href="/">' + html;
     }
-  };
+
+    frame.onload = () => {
+      try {
+        originalHtml = '<!DOCTYPE html>\n' + frame.contentDocument.documentElement.outerHTML;
+        injectEditor();
+        history = [originalHtml];
+        historyIdx = 0;
+        unsaved = false;
+        saveBtn.classList.remove('unsaved');
+        updateUndoRedo();
+        edToast('Loaded: ' + file, 'info');
+      } catch(e) {
+        edToast('Failed to access page frame', 'error');
+      }
+    };
+    frame.srcdoc = html;
+  } catch (e) {
+    edToast('Failed to load page: ' + e.message, 'error');
+  }
 }
 
 function injectEditor() {
@@ -105,7 +148,7 @@ function injectEditor() {
     if (link && link.href) {
       const url = new URL(link.href, frame.contentWindow.location.origin);
       const path = url.pathname.replace(/^\//, '');
-      const allowed = ['index.html','pages/collection.html','pages/product.html','pages/about.html','pages/commission.html'];
+      const allowed = editablePages.map(p => p.file);
       if (allowed.includes(path) || (path === '' && allowed.includes('index.html'))) {
         e.preventDefault();
         const file = path === '' ? 'index.html' : path;
@@ -280,6 +323,9 @@ function markUnsaved(){unsaved=true;saveBtn.classList.add('unsaved');}
 function getCleanHtml() {
   const doc = frame.contentDocument; if(!doc) return '';
   const clone = doc.documentElement.cloneNode(true);
+  // Remove the <base href="/"> tag we injected for editing — must never be saved to disk
+  const baseTag = clone.querySelector('base[href="/"]');
+  if (baseTag) baseTag.remove();
   // Remove editor injections
   const injStyle = clone.querySelector('#editor-inject-style');
   if(injStyle) injStyle.remove();

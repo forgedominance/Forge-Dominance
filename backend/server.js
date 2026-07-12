@@ -128,7 +128,7 @@ function applySecurityHeaders(req, res, next) {
       "img-src 'self' data: blob: https:; " +
       "media-src 'self'; " +
       "connect-src 'self' https://www.google-analytics.com; " +
-      "frame-ancestors 'none'; " +
+      "frame-ancestors 'self'; " +
       "base-uri 'self'; " +
       "form-action 'self';"
     );
@@ -311,7 +311,18 @@ app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object') {
     preventPrototypePollution(req.body);
     removeMongoOperators(req.body);
+    // The visual page editor legitimately sends raw HTML in req.body.html.
+    // It's already gated by authenticate + authorize('admin') + a strict
+    // file whitelist in the route itself, so skip generic tag-stripping
+    // for this one field/route rather than weakening sanitization globally.
+    const isEditorSave = req.path === '/api/editor/save';
+    const preservedHtml = (isEditorSave && typeof req.body.html === 'string')
+      ? req.body.html
+      : undefined;
     req.body = sanitizeObject(req.body);
+    if (isEditorSave && preservedHtml !== undefined) {
+      req.body.html = preservedHtml;
+    }
   }
   if (req.query && typeof req.query === 'object') {
     preventPrototypePollution(req.query);

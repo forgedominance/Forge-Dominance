@@ -75,6 +75,7 @@ router.get('/:id', authenticate, orderController.getById);
 router.post('/', authenticate, authorize('admin'), orderController.create);
 router.put('/:id', authenticate, authorize('admin'), orderController.update);
 router.patch('/:id/status', authenticate, authorize('admin'), orderController.updateStatus);
+router.delete('/all', authenticate, authorize('admin'), orderController.deleteAll);
 router.delete('/:id', authenticate, authorize('admin'), orderController.delete);
 
 module.exports = router;

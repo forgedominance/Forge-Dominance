@@ -283,9 +283,20 @@ const orderController = {
     try {
       await Order.delete(req.params.id);
       redis.del(`orders:single:${req.params.id}`).catch(() => {});
-      redis.del('orders:list:20:0').catch(() => {});
-      redis.del('orders:list:200:0').catch(() => {});
+      redis.delPattern('orders:list:').catch(() => {});
       res.json({ message: 'Order deleted successfully' });
+    } catch (error) {
+      console.error('[Orders] Error:', error);
+      res.status(500).json({ error: 'An internal server error occurred' });
+    }
+  },
+
+  deleteAll: async (req, res) => {
+    try {
+      await Order.deleteAll();
+      redis.delPattern('orders:list:').catch(() => {});
+      redis.delPattern('orders:single:').catch(() => {});
+      res.json({ message: 'All orders deleted successfully' });
     } catch (error) {
       console.error('[Orders] Error:', error);
       res.status(500).json({ error: 'An internal server error occurred' });

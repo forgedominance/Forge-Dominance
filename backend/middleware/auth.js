@@ -19,17 +19,24 @@ const requireAdminSubdomain = (req, res, next) => {
   const hostname = host.split(':')[0];
   
   // In production, strictly require admin.forgedominance.com
-  if (process.env.NODE_ENV === 'production') {
-    if (hostname !== 'admin.forgedominance.com') {
-      return res.status(403).json({ error: 'Forbidden' });
+  const blocked = process.env.NODE_ENV === 'production'
+    ? (hostname !== 'admin.forgedominance.com')
+    : (!hostname.includes('admin') && hostname !== 'localhost' && hostname !== '127.0.0.1');
+
+  if (blocked) {
+    // Respond exactly like the site's real 404 — indistinguishable from a
+    // route that genuinely doesn't exist, so /admin/* is never fingerprintable
+    // from the main domain.
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'Route not found' });
     }
-  } else {
-    // In dev, allow localhost or admin.localhost variants for testing
-    if (!hostname.includes('admin') && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return res.status(403).json({ error: 'Forbidden' });
+    const notFoundPage = require('path').join(__dirname, '..', '..', '404.html');
+    if (require('fs').existsSync(notFoundPage)) {
+      return res.status(404).sendFile(notFoundPage);
     }
+    return res.status(404).json({ error: 'Route not found' });
   }
-  
+
   next();
 };
 

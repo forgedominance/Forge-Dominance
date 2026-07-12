@@ -710,6 +710,21 @@
       }
     });
 
+    // Delete all orders
+    document.getElementById('deleteAllOrdersBtn').addEventListener('click', async () => {
+      if (!allOrders.length) return Toast.info('No orders to delete');
+      if (!confirm(`Are you sure you want to delete all ${allOrders.length} orders? This cannot be undone.`)) return;
+      try {
+        await OrdersService.deleteAll();
+        allOrders = [];
+        applyStatusFilter();
+        document.getElementById('ordersSummary').textContent = '0 total orders';
+        Toast.success('All orders deleted');
+      } catch (err) {
+        Toast.error(err.message || 'Failed to delete orders');
+      }
+    });
+
     // Delete all commissions
     document.getElementById('deleteAllCommissionsBtn').addEventListener('click', async () => {
       if (!allCommissions.length) return Toast.info('No commissions to delete');

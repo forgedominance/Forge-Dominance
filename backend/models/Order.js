@@ -102,6 +102,11 @@ class Order {
     if (error) throw error;
     return { message: 'Order deleted successfully' };
   }
+
+  static async deleteAll() {
+    const { error } = await supabase.from('orders').delete().not('id', 'is', null);
+    if (error) throw error;
+  }
 }
 
 module.exports = Order;

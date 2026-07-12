@@ -213,6 +213,21 @@ async function del(key) {
   return true;
 }
 
+async function delPattern(prefix) {
+  for (const key of memStore.keys()) {
+    if (key.startsWith(prefix)) memDel(key);
+  }
+  if (isRedisAvailable && isConnected && client) {
+    try {
+      const keys = await withTimeout(client.keys(`*`));
+      if (keys && keys.length) await withTimeout(client.del(keys));
+    } catch (err) {
+      // silent
+    }
+  }
+  return true;
+}
+
 async function flush() {
   memFlush();
   if (isRedisAvailable && isConnected && client) {
@@ -250,6 +265,7 @@ module.exports = {
   get,
   set,
   del,
+  delPattern,
   flush,
   getOrFetch,
   isReady,
