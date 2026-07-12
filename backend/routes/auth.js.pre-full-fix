@@ -515,7 +515,7 @@ router.post('/login',
           );
           if (userRow?.totp_enabled && userRow?.totp_secret) {
             // User has TOTP configured - require authenticator code
-            await cache.set(tempToken, createOtpEntry({ email: user.email, otp: '__TOTP__', purpose: '2fa' }), 300);
+            otpStore.set(tempToken, createOtpEntry({ email: user.email, otp: '__TOTP__', purpose: '2fa' }));
             return res.json({
               twoFactorRequired: true,
               method: 'authenticator',
@@ -531,7 +531,8 @@ router.post('/login',
             try { qrDataUrl = await QRCode.toDataURL(otpauth); } catch (_) {}
 
             // Store secret temporarily for verification during setup
-            await cache.set(tempToken, { ...createOtpEntry({ email: user.email, otp: '__TOTP_SETUP__', purpose: '2fa-setup' }), totpSecret: secret }, 300);
+            otpStore.set(tempToken, createOtpEntry({ email: user.email, otp: '__TOTP_SETUP__', purpose: '2fa-setup' }));
+            otpStore.get(tempToken).totpSecret = secret;
 
             return res.json({
               twoFactorRequired: true,
@@ -548,7 +549,7 @@ router.post('/login',
         // Email OTP flow
         if (useEmail) {
           const otpCode = generateOTP();
-          await cache.set(tempToken, createOtpEntry({ email: user.email, otp: otpCode, purpose: '2fa' }), 300);
+          otpStore.set(tempToken, createOtpEntry({ email: user.email, otp: otpCode, purpose: '2fa' }));
 
           try {
             await sendEmail(
@@ -650,9 +651,7 @@ router.post('/forgot-password', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    const resetEntry = createOtpEntry({ email, otp: resetCode, purpose: 'password-reset' });
-    await cache.set(resetToken, resetEntry, 3600);
-    await cache.set(`resetcode_email_${String(email).toLowerCase()}`, { ...resetEntry, resetToken }, 3600);
+    otpStore.set(resetToken, createOtpEntry({ email, otp: resetCode, purpose: 'password-reset' }));
 
     // Send reset code via email - don't fail if email sending fails
     try {
@@ -696,7 +695,7 @@ router.post('/resend-reset-code', async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    const entry = await cache.get(resetToken);
+    const entry = otpStore.get(resetToken);
     if (!entry || String(entry.email || '').toLowerCase() !== String(decoded.email || '').toLowerCase()) {
       return res.status(401).json({ message: 'Reset code expired' });
     }
@@ -707,9 +706,7 @@ router.post('/resend-reset-code', async (req, res) => {
     }
 
     const resetCode = generateOTP();
-    const resendEntry = createOtpEntry({ email: decoded.email, otp: resetCode, purpose: 'password-reset' });
-    await cache.set(resetToken, resendEntry, 3600);
-    await cache.set(`resetcode_email_${String(decoded.email).toLowerCase()}`, { ...resendEntry, resetToken }, 3600);
+    otpStore.set(resetToken, createOtpEntry({ email: decoded.email, otp: resetCode, purpose: 'password-reset' }));
 
     try {
       await sendEmail(decoded.email, 'Password Reset Request', `Your password reset code is: ${resetCode}`);
@@ -735,9 +732,11 @@ router.post('/verify-reset-code', async (req, res) => {
     }
 
     let resetToken = null;
-    const indexed = await cache.get(`resetcode_email_${String(email).toLowerCase()}`);
-    if (indexed && String(indexed.code || '').trim() === String(code || '').trim() && Number(indexed.expiresAt || 0) > Date.now()) {
-      resetToken = indexed.resetToken;
+    for (const [token, data] of otpStore.entries()) {
+      if (String(data.email || '').toLowerCase() === String(email || '').toLowerCase() && String(data.code || '').trim() === String(code || '').trim() && data.expiresAt > Date.now()) {
+        resetToken = token;
+        break;
+      }
     }
 
     if (!resetToken) {
@@ -767,7 +766,7 @@ router.post('/resend-2fa', async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    const entry = await cache.get(tempToken);
+    const entry = otpStore.get(tempToken);
     if (!entry || String(entry.email || '').toLowerCase() !== String(decoded.email || '').toLowerCase()) {
       return res.status(401).json({ message: 'Verification code expired' });
     }
@@ -778,7 +777,7 @@ router.post('/resend-2fa', async (req, res) => {
     }
 
     const otpCode = generateOTP();
-    await cache.set(tempToken, createOtpEntry({ email: decoded.email, otp: otpCode, purpose: '2fa' }), 300);
+    otpStore.set(tempToken, createOtpEntry({ email: decoded.email, otp: otpCode, purpose: '2fa' }));
 
     try {
       await sendEmail(
@@ -821,7 +820,7 @@ router.post('/verify-2fa', async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    const otpData = await cache.get(tempToken);
+    const otpData = otpStore.get(tempToken);
     if (!otpData || otpData.expiresAt < Date.now()) {
       return res.status(401).json({ message: 'Invalid or expired code' });
     }
@@ -869,7 +868,7 @@ router.post('/verify-2fa', async (req, res) => {
     const accessToken = generateAccessToken(admin.id, admin.email, normalizedRole, expiresIn);
     const refreshToken = generateRefreshToken(admin.id);
 
-    await cache.del(tempToken);
+    otpStore.delete(tempToken);
 
     const loginNow2 = new Date().toISOString();
     const { data: activityRows, error: activityError } = await supabase.from('admin_login_activity').insert({
@@ -913,12 +912,12 @@ router.post('/reset-password', async (req, res) => {
     let resetData = null;
     let resetToken = null;
 
-    const indexedReset = await cache.get(`resetcode_email_${String(email).toLowerCase()}`);
-    if (indexedReset) {
-      const storedCode = String(indexedReset.code || indexedReset.otp || '').trim();
-      if (String(indexedReset.email || '').toLowerCase() === String(email || '').toLowerCase() && storedCode === String(code || '').trim() && Number(indexedReset.expiresAt || 0) > Date.now()) {
-        resetData = indexedReset;
-        resetToken = indexedReset.resetToken;
+    for (const [token, data] of otpStore.entries()) {
+      const storedCode = String(data.code || data.otp || '').trim();
+      if (String(data.email || '').toLowerCase() === String(email || '').toLowerCase() && storedCode === String(code || '').trim() && data.expiresAt > Date.now()) {
+        resetData = data;
+        resetToken = token;
+        break;
       }
     }
 
@@ -941,8 +940,7 @@ router.post('/reset-password', async (req, res) => {
     const User = require('../models/User');
     await User.updatePassword(user.id, newPassword);
 
-    await cache.del(resetToken);
-    await cache.del(`resetcode_email_${String(email).toLowerCase()}`);
+    otpStore.delete(resetToken);
     res.json({ message: 'Password reset successful' });
   } catch (error) {
     console.error('Reset password error:', error);

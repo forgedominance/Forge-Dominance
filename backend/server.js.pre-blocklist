@@ -567,18 +567,6 @@ app.get('/pages/order.html', async (req, res, next) => {
   }
 });
 
-// Block requests for backup files, dotfiles, and other sensitive
-// patterns before they ever reach static file serving. This protects
-// /assets, /admin, and /pages (and anything served this way in the
-// future) regardless of what stray files end up on disk.
-const BLOCKED_FILE_PATTERNS = /(\.backup(-|$)|\.bak($|[.-])|~$|\.env($|\.)|\.git($|\/)|\.orig$|\.old$)/i;
-app.use((req, res, next) => {
-  if (BLOCKED_FILE_PATTERNS.test(req.path)) {
-    return res.status(404).end();
-  }
-  next();
-});
-
 if (assetsDir) {
   app.use('/assets', express.static(assetsDir, { maxAge: '1d' }));
 }
