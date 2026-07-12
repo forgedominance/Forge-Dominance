@@ -57,3 +57,4 @@ assets/products-backup-presresize/
 *.backup-*
 *.pre-*-fix
 *.pre-*
+backups/
