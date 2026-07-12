@@ -168,6 +168,7 @@ router.get('/page', authenticate, (req, res) => {
       return res.status(403).json({ error: 'File not allowed' });
     }
     const filePath = resolveFilePath(file);
+    fs.mkdirSync(BACKUP_DIR, { recursive: true }); // defensive: recreate if deleted externally
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'File not found' });
     }
@@ -191,6 +192,7 @@ router.post('/save', authenticate, authorize('admin'), (req, res) => {
     }
 
     const filePath = resolveFilePath(file);
+    fs.mkdirSync(BACKUP_DIR, { recursive: true }); // defensive: recreate if deleted externally
 
     // Create timestamped backup
     if (fs.existsSync(filePath)) {
