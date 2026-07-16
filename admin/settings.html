@@ -39,6 +39,7 @@
           <button id="homepageTab" class="nav-tab-btn" data-tab="homepage">🏠 Homepage</button>
           <button id="storeTab" class="nav-tab-btn" data-tab="store">🛒 Store</button>
           <button id="paymentsTab" class="nav-tab-btn" data-tab="payments">💳 Payments</button>
+          <button id="socialTab" class="nav-tab-btn" data-tab="social">📱 Social Media</button>
         </div>
 
         <!-- Users & Roles Tab -->
@@ -456,6 +457,97 @@
         </div>
 
         <!-- Store Tab -->
+        <!-- Social Media Tab -->
+        <div id="socialContent" class="tab-content">
+          <div class="settings-grid">
+            <div>
+              <h3 class="settings-form-card h3">Social Media Links</h3>
+              <div class="settings-form-card">
+                <p class="settings-checkbox-desc" style="margin-bottom:1rem;">Toggle any platform on to show its icon in the site footer. Enter just the username/handle.</p>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_instagram_enabled" type="checkbox">
+                    <span>Instagram</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_instagram_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_tiktok_enabled" type="checkbox">
+                    <span>TikTok</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_tiktok_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_youtube_enabled" type="checkbox">
+                    <span>YouTube</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_youtube_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_facebook_enabled" type="checkbox">
+                    <span>Facebook</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_facebook_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_twitter_enabled" type="checkbox">
+                    <span>X / Twitter</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_twitter_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_pinterest_enabled" type="checkbox">
+                    <span>Pinterest</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_pinterest_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <div class="settings-checkbox-group">
+                  <label class="settings-checkbox-label">
+                    <input id="social_linkedin_enabled" type="checkbox">
+                    <span>LinkedIn</span>
+                  </label>
+                  <div class="settings-field-group">
+                    <label class="settings-label">USERNAME</label>
+                    <input id="social_linkedin_username" type="text" placeholder="forgedominance" class="settings-input">
+                  </div>
+                </div>
+
+                <button id="saveSocialBtn" class="settings-btn">Save Social Media Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="storeContent" class="tab-content">
           <div class="settings-grid">
             <div>
@@ -510,6 +602,7 @@
 
 
   <script src="../assets/js/site-settings.js?v=20260613" defer></script>
+  <script src="../assets/admin/js/settings-social.js?v=20260613" defer></script>
   <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
   <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
   <script src="/assets/admin/js/settings-page.js?v=20260613" defer></script>

