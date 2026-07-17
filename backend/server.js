@@ -29,6 +29,7 @@ const commissionsRoutes = require('./routes/commissions');
 const chatRoutes = require('./routes/chat');
 const homepageContentRoutes = require('./routes/homepage-content');
 const stripeRoutes = require('./routes/stripe');
+const refRoutes = require('./routes/ref');
 const { primeSiteSettingsCache } = require('./lib/siteSettings');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -645,6 +646,7 @@ app.use('/api/visitors/track', visitorTrackRateLimit);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
+app.use('/r', refRoutes);
 app.use('/api/customers', requireAdminSubdomain, customersRoutes);
 app.use('/api/dashboard', requireAdminSubdomain, dashboardRoutes);
 app.use('/api/promotions', requireAdminSubdomain, promotionsRoutes);

@@ -198,7 +198,7 @@ router.post('/public', upload.single('reference_image'), async (req, res) => {
     if (req.body && req.body.website) {
       return res.status(200).json({ success: true, message: 'Commission submitted successfully' });
     }
-    const { firstName, lastName, email, phone, country, countryCode, brief, budget } = req.body || {};
+    const { firstName, lastName, email, phone, country, countryCode, brief, budget, ownerRef } = req.body || {};
     const fields = {};
     if (!firstName || String(firstName).trim().length === 0) fields.firstName = 'First name is required';
     if (!lastName || String(lastName).trim().length === 0) fields.lastName = 'Last name is required';
@@ -223,7 +223,7 @@ router.post('/public', upload.single('reference_image'), async (req, res) => {
       budget: budget ? Number(budget) : null,
       reference_image_url: req.file ? `/assets/uploads/commissions/${req.file.filename}` : null,
       reference_image_path: req.file ? `assets/uploads/commissions/${req.file.filename}` : null,
-      source: 'website',
+      source: ownerRef ? `website:${ownerRef}` : 'website',
       status: 'new'
     };
 

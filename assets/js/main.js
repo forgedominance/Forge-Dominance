@@ -486,6 +486,7 @@ function submitOrder() {
   formData.append('countryCode', countryCode);
   formData.append('brief', brief);
   formData.append('budget', String(commissionState.budget));
+  formData.append('ownerRef', localStorage.getItem('bs_owner_ref') || '');
   if (refInput && refInput.files && refInput.files[0]) {
     formData.append('reference_image', refInput.files[0]);
   }
@@ -597,7 +598,8 @@ async function submitOrderLead() {
   const items = loadCartState();
   const payload = {
     ...data,
-    items
+    items,
+    ownerRef: localStorage.getItem('bs_owner_ref') || null
   };
 
   // Saving the lead to the backend is a "nice to have" for record-keeping,

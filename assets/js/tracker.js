@@ -1,3 +1,19 @@
+// Capture owner attribution from ?owner= param, persist to localStorage, clean the URL
+(function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const owner = params.get('owner');
+    const validOwners = ['hadded', 'faiq', 'moiz', 'ali'];
+    if (owner && validOwners.includes(owner)) {
+      localStorage.setItem('bs_owner_ref', owner);
+      params.delete('owner');
+      const cleanQuery = params.toString();
+      const cleanUrl = window.location.pathname + (cleanQuery ? '?' + cleanQuery : '') + window.location.hash;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  } catch (e) { /* localStorage unavailable, ignore */ }
+})();
+
 // Forge Dominance User Tracking System
 // Batches events and flushes every 10 seconds to reduce network calls
 

@@ -11,7 +11,7 @@ router.post('/public', async (req, res) => {
 		if (req.body && req.body.website) {
 			return res.status(200).json({ success: true, message: 'Order submitted successfully' });
 		}
-		const { firstName, lastName, email, phone, country, addressLine1, addressLine2, city, state, postalCode, brief, budget, items } = req.body || {};
+		const { firstName, lastName, email, phone, country, addressLine1, addressLine2, city, state, postalCode, brief, budget, items, ownerRef } = req.body || {};
 		if (!firstName || !lastName || !email) {
 			return res.status(400).json({ error: 'Missing required fields' });
 		}
@@ -46,6 +46,7 @@ router.post('/public', async (req, res) => {
 			total: total || Number(budget || 0) || 0,
 			items: {
 				source: 'website-whatsapp',
+				owner_ref: ownerRef || null,
 				brief: brief || '',
 				budget,
 				firstName,
