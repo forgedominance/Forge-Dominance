@@ -65,6 +65,7 @@
                 <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Email</th>
                 <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Status</th>
                 <th style="text-align:right;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Total</th>
+                <th style="text-align:right;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Discount</th>
                 <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Items</th>
                 <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Created At</th>
                 <th style="text-align:left;padding:1rem;border-bottom:0.125rem solid var(--border-color);font-weight:600;">Updated At</th>
@@ -288,14 +289,24 @@
           </div>
 
           <div class="order-detail-field full-span">
-            <label for="detailItems">Order Items JSON</label>
-            <textarea id="detailItems" placeholder='[{"product_id":1,"product_name":"Sword","qty":1,"price":100}]'></textarea>
+            <label>Ordered Products</label>
+            <div id="detailProductCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:0.75rem;margin-bottom:1rem;"></div>
+          </div>
+          <div class="order-detail-field full-span">
+            <details>
+              <summary style="cursor:pointer;color:var(--text-secondary);font-size:0.85rem;margin-bottom:0.5rem;">Edit raw Order Items JSON (advanced)</summary>
+              <label for="detailItems">Order Items JSON</label>
+              <textarea id="detailItems" placeholder='[{"product_id":1,"product_name":"Sword","qty":1,"price":100}]'></textarea>
+            </details>
           </div>
 
           <div class="order-detail-field full-span">
             <div class="order-summary-panel">
               <div class="order-summary-row"><strong>Created At</strong><span id="detailCreatedAt">-</span></div>
               <div class="order-summary-row"><strong>Updated At</strong><span id="detailUpdatedAt">-</span></div>
+              <div class="order-summary-row"><strong>Subtotal</strong><span id="detailSubtotal">-</span></div>
+              <div class="order-summary-row"><strong>Discount</strong><span id="detailDiscount">-</span></div>
+              <div class="order-summary-row"><strong>Coupon Used</strong><span id="detailCouponCode">-</span></div>
               <div class="order-summary-row"><strong>Item Count</strong><span id="detailItemCount">0</span></div>
             </div>
           </div>
@@ -389,7 +400,7 @@
   <script src="../assets/js/site-settings.js?v=20260613" defer></script>
   <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
   <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
-  <script src="/assets/admin/js/orders-page.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/orders-page.js?v=20260731" defer></script>
   <script src="/assets/admin/js/session-timeout.js" defer></script>
 </body>
 </html>

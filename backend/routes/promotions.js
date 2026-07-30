@@ -668,6 +668,80 @@ router.delete('/ads/:id', authenticate, authorize('admin'), async (req, res) => 
 });
 
 // ===== COUPONS (separate table) =====
+
+// Public: validate a coupon code from the storefront (no admin auth).
+// Deliberately returns only what the customer needs to see a discount —
+// never the full coupon list — so this is safe to expose publicly.
+function isCouponUsable(coupon) {
+  if (!coupon) return { ok: false, error: 'Coupon not found' };
+  if (coupon.is_active === false) return { ok: false, error: 'This coupon is no longer active' };
+  if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+    return { ok: false, error: 'This coupon has expired' };
+  }
+  if (coupon.usage_limit != null && Number(coupon.used_count || 0) >= Number(coupon.usage_limit)) {
+    return { ok: false, error: 'This coupon has reached its usage limit' };
+  }
+  return { ok: true };
+}
+
+async function findCouponByCode(code) {
+  const { data, error } = await supabase
+    .from('coupons')
+    .select('*')
+    .ilike('code', code)
+    .limit(1);
+  if (!error && data && data[0]) return data[0];
+
+  if (error && !isMissingTableError(error)) throw error;
+
+  // Legacy `promotions` table fallback (type = 'coupon')
+  const legacy = await supabase
+    .from('promotions')
+    .select('*')
+    .eq('type', 'coupon')
+    .ilike('code', code)
+    .limit(1);
+  if (!legacy?.error && legacy.data && legacy.data[0]) {
+    const row = legacy.data[0];
+    return {
+      id: row.id,
+      code: row.code,
+      coupon_type: 'percent',
+      amount: Number(row.discount || 0),
+      usage_limit: row.max_uses,
+      used_count: 0,
+      expires_at: row.expires_at,
+      is_active: row.is_active !== false
+    };
+  }
+
+  // File-based fallback store
+  const fallback = readFallbackList(COUPONS_STORE_FILE)
+    .find((c) => String(c.code || '').toLowerCase() === code.toLowerCase());
+  return fallback || null;
+}
+
+router.post('/coupons/validate', async (req, res) => {
+  try {
+    const code = String(req.body?.code || '').trim();
+    if (!code) return res.status(400).json({ valid: false, error: 'Coupon code is required' });
+
+    const coupon = await findCouponByCode(code);
+    const usable = isCouponUsable(coupon);
+    if (!usable.ok) return res.status(coupon ? 400 : 404).json({ valid: false, error: usable.error });
+
+    return res.json({
+      valid: true,
+      code: coupon.code,
+      coupon_type: coupon.coupon_type === 'fixed' ? 'fixed' : 'percent',
+      amount: Number(coupon.amount || 0)
+    });
+  } catch (error) {
+    console.error('[Promotions] Coupon validate error:', error);
+    return res.status(500).json({ valid: false, error: 'Could not validate coupon right now' });
+  }
+});
+
 router.get('/coupons', authenticate, async (_req, res) => {
   try {
     const result = await redis.getOrFetch('promotions:coupons', 120, async () => {
@@ -741,6 +815,7 @@ router.post('/coupons', authenticate, authorize('admin'), async (req, res) => {
         };
         const legacy = await supabase.from('promotions').insert(legacyPayload).select('*').single();
         if (!legacy?.error && legacy?.data) {
+          await clearActivePromoCache();
           return res.status(201).json({
             id: legacy.data.id,
             code: legacy.data.code,
@@ -755,11 +830,13 @@ router.post('/coupons', authenticate, authorize('admin'), async (req, res) => {
             updated_at: legacy.data.updated_at
           });
         }
+        await clearActivePromoCache();
         return res.status(201).json(createFallbackRow(COUPONS_STORE_FILE, payload));
       }
       throw error;
     }
 
+    await clearActivePromoCache();
     return res.status(201).json(data);
   } catch (error) {
     console.error('[Promotions] Error:', error);
@@ -774,14 +851,17 @@ router.delete('/coupons/:id', authenticate, authorize('admin'), async (req, res)
       if (isMissingTableError(error)) {
         const legacyDelete = await supabase.from('promotions').delete().eq('id', req.params.id).eq('type', 'coupon');
         if (!legacyDelete?.error) {
+          await clearActivePromoCache();
           return res.json({ message: 'Coupon deleted' });
         }
         deleteFallbackRow(COUPONS_STORE_FILE, req.params.id);
+        await clearActivePromoCache();
         return res.json({ message: 'Coupon deleted' });
       }
       throw error;
     }
 
+    await clearActivePromoCache();
     return res.json({ message: 'Coupon deleted' });
   } catch (error) {
     console.error('[Promotions] Error:', error);
@@ -1257,4 +1337,5 @@ router.delete('/campaigns/queue/:id', authenticate, authorize('admin'), async (r
 
 module.exports = router;
 
-
+module.exports.findCouponByCode = findCouponByCode;
+module.exports.isCouponUsable = isCouponUsable;

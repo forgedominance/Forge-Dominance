@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex, nofollow"/>
 <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg"/>
 <link rel="stylesheet" href="../assets/css/bundle-order.min.css"/>
+<link rel="stylesheet" href="../assets/css/coupon-widget.css"/>
 <meta id="og-title" property="og:title" content="Forge Dominance — Your Order" />
 <meta id="og-description" property="og:description" content="Review your selected blades and send your order details to Forge Dominance." />
 <meta id="og-image" property="og:image" content="https://forgedominance.com/assets/images/logo.jpg" />
@@ -145,8 +146,26 @@
         </div>
 
         <div class="order-summary-total">
-          <span>Order Total</span>
+          <span>Subtotal</span>
           <strong id="order-selected-total">$0</strong>
+        </div>
+
+        <div class="order-coupon-box">
+          <div class="order-coupon-input-row">
+            <input type="text" id="couponCode" placeholder="Coupon code" autocomplete="off"/>
+            <button type="button" class="btn-apply-coupon" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+          </div>
+          <p class="coupon-msg" id="couponMsg"></p>
+        </div>
+
+        <div class="order-summary-discount" id="orderDiscountRow" style="display:none">
+          <span>Discount (<span id="couponCodeLabel"></span>)<button type="button" class="coupon-remove-btn" onclick="removeCoupon()" aria-label="Remove coupon">✕</button></span>
+          <strong id="order-discount-amount">-$0</strong>
+        </div>
+
+        <div class="order-summary-grand-total">
+          <span>Order Total</span>
+          <strong id="order-grand-total">$0</strong>
         </div>
 
         <div class="order-contact-form">
@@ -305,8 +324,8 @@
 </div><!-- END ORDER PAGE -->
 
 
-<script src="../assets/js/site-settings.js?v=20260613" defer></script><script src="../assets/js/age-gate.js?v=20260613" defer></script><script src="../assets/js/main.js?v=20260712g" defer></script>
-<script src="../assets/js/sticky-contact.js?v=20260613" defer></script><script src="../assets/js/tracker.js?v=20260613" defer></script>
+<script src="../assets/js/site-settings.js?v=20260613" defer></script><script src="../assets/js/age-gate.js?v=20260613" defer></script><script src="../assets/js/main.js?v=20260730" defer></script>
+<script src="../assets/js/sticky-contact.js?v=20260613" defer></script><script src="../assets/js/tracker.js?v=20260717" defer></script>
 </body>
 </html>
 

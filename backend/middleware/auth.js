@@ -4,7 +4,8 @@ const { verifyAccessToken } = require('../config/jwt');
 const PUBLIC_SUBPATHS = [
   /^\/public(\/|$)/,
   /^\/track$/,
-  /^\/ads\/public$/
+  /^\/ads\/public$/,
+  /^\/coupons\/validate$/
 ];
 
 const requireAdminSubdomain = (req, res, next) => {

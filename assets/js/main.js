@@ -1,3 +1,4 @@
+let appliedCoupon = null; // { code, coupon_type: 'percent'|'fixed', amount }
 function runWhenIdle(fn) {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(fn, { timeout: 2000 });
@@ -107,6 +108,7 @@ function saveCartState() {
 function clearCart() {
   cart = [];
   saveCartState();
+  if (typeof appliedCoupon !== 'undefined') appliedCoupon = null;
   if (typeof updateCartUI === 'function') updateCartUI();
 }
 
@@ -599,7 +601,8 @@ async function submitOrderLead() {
   const payload = {
     ...data,
     items,
-    ownerRef: localStorage.getItem('bs_owner_ref') || null
+    ownerRef: localStorage.getItem('bs_owner_ref') || null,
+    couponCode: appliedCoupon?.code || null
   };
 
   // Saving the lead to the backend is a "nice to have" for record-keeping,
@@ -656,6 +659,12 @@ function buildOrderWhatsAppMessage() {
     }).join('\n')
     : '• No products selected';
 
+  const subtotal = getOrderSubtotal();
+  const discount = computeCouponDiscount(subtotal, appliedCoupon);
+  const couponLines = appliedCoupon && discount > 0
+    ? [``, `🏷️ Coupon: ${appliedCoupon.code} (-$${discount.toLocaleString()})`, `💰 Total after discount: $${(subtotal - discount).toLocaleString()}`]
+    : [];
+
   const lines = [
     `--- NEW ORDER ---`,
     ``,
@@ -665,6 +674,7 @@ function buildOrderWhatsAppMessage() {
     ``,
     `🛒 Order:`,
     itemLines,
+    ...couponLines,
     ``,
     `💬 Please confirm this order. Thank you!`,
     ``,
@@ -688,6 +698,12 @@ function buildOrderEmailBody() {
     return `${item.name || 'Unnamed'}  |  ${item.steel || 'Custom'}  |  $${price.toLocaleString()}${qty > 1 ? '  x' + qty : ''}`;
   }).join('\n');
 
+  const discount = computeCouponDiscount(total, appliedCoupon);
+  const grandTotal = Math.max(0, total - discount);
+  const couponLines = appliedCoupon && discount > 0
+    ? [`Coupon: ${appliedCoupon.code} (-${formatBudget(discount)})`, `Total after discount: ${formatBudget(grandTotal)}`]
+    : [];
+
   return [
     `Hi ${siteName},`,
     ``,
@@ -696,7 +712,8 @@ function buildOrderEmailBody() {
     ``,
     itemLines || 'No items selected',
     ``,
-    `Total: ${formatBudget(total)}`,
+    `Subtotal: ${formatBudget(total)}`,
+    ...couponLines,
     lastOrderId ? `Order #${lastOrderId}` : '',
     ``,
     ``,
@@ -1005,11 +1022,91 @@ function initCommissionPage() {
   renderSelectedProductsSummary();
 }
 
+/* ─── COUPONS (order page) ─── */
+
+function getOrderSubtotal() {
+  return loadCartState().reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0);
+}
+
+function computeCouponDiscount(subtotal, coupon) {
+  if (!coupon) return 0;
+  const amount = Number(coupon.amount || 0);
+  const raw = coupon.coupon_type === 'fixed' ? amount : subtotal * (amount / 100);
+  return Math.max(0, Math.min(raw, subtotal));
+}
+
+function setCouponMessage(text, kind) {
+  const el = document.getElementById('couponMsg');
+  if (!el) return;
+  el.textContent = text || '';
+  el.classList.remove('is-error', 'is-success');
+  if (kind) el.classList.add(kind === 'error' ? 'is-error' : 'is-success');
+}
+
+async function applyCoupon() {
+  const input = document.getElementById('couponCode');
+  const btn = document.getElementById('couponApplyBtn');
+  const code = (input?.value || '').trim();
+  if (!code) {
+    setCouponMessage('Enter a coupon code.', 'error');
+    return;
+  }
+
+  const action = async () => {
+    try {
+      const res = await fetch('/api/promotions/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.valid) {
+        appliedCoupon = null;
+        setCouponMessage(result.error || 'That coupon code is not valid.', 'error');
+        showChatToast(result.error || 'That coupon code is not valid.');
+        input?.classList.remove('coupon-applied');
+        renderSelectedProductsSummary();
+        return;
+      }
+      appliedCoupon = { code: result.code, coupon_type: result.coupon_type, amount: result.amount };
+      input?.classList.add('coupon-applied');
+      setCouponMessage(`Coupon "${result.code}" applied.`, 'success');
+      showChatToast(`Coupon "${result.code}" applied successfully.`);
+      renderSelectedProductsSummary();
+    } catch (error) {
+      console.error('Coupon validation failed:', error);
+      setCouponMessage('Could not validate coupon right now. Please try again.', 'error');
+    }
+  };
+
+  if (btn) return withLoading(btn, action);
+  return action();
+}
+window.applyCoupon = applyCoupon;
+
+
+function removeCoupon() {
+  appliedCoupon = null;
+  const input = document.getElementById('couponCode');
+  if (input) {
+    input.value = '';
+    input.classList.remove('coupon-applied');
+  }
+  setCouponMessage('', null);
+  renderSelectedProductsSummary();
+}
+window.removeCoupon = removeCoupon;
+
+
 function renderSelectedProductsSummary() {
   const list = document.getElementById('order-selected-products');
   const totalEl = document.getElementById('order-selected-total');
   const countEl = document.getElementById('order-selected-count');
   const pluralEl = document.getElementById('order-plural');
+  const discountRow = document.getElementById('orderDiscountRow');
+  const discountAmountEl = document.getElementById('order-discount-amount');
+  const couponCodeLabel = document.getElementById('couponCodeLabel');
+  const grandTotalEl = document.getElementById('order-grand-total');
   if (!list || !totalEl || !countEl) return;
 
   const items = loadCartState();
@@ -1018,6 +1115,14 @@ function renderSelectedProductsSummary() {
 
   countEl.textContent = String(count);
   totalEl.textContent = '$' + total.toLocaleString();
+
+  const discount = computeCouponDiscount(total, appliedCoupon);
+  const grandTotal = Math.max(0, total - discount);
+
+  if (discountRow) discountRow.style.display = appliedCoupon && discount > 0 ? 'flex' : 'none';
+  if (discountAmountEl) discountAmountEl.textContent = '-$' + discount.toLocaleString();
+  if (couponCodeLabel) couponCodeLabel.textContent = appliedCoupon ? appliedCoupon.code : '';
+  if (grandTotalEl) grandTotalEl.textContent = '$' + grandTotal.toLocaleString();
 
   if (pluralEl) {
     pluralEl.textContent = count === 1 ? '' : 's';

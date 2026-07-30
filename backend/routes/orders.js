@@ -2,6 +2,7 @@ const express = require('express');
 const orderController = require('../controllers/orderController');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
+const supabase = require('../config/supabase');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -11,7 +12,7 @@ router.post('/public', async (req, res) => {
 		if (req.body && req.body.website) {
 			return res.status(200).json({ success: true, message: 'Order submitted successfully' });
 		}
-		const { firstName, lastName, email, phone, country, addressLine1, addressLine2, city, state, postalCode, brief, budget, items, ownerRef } = req.body || {};
+		const { firstName, lastName, email, phone, country, addressLine1, addressLine2, city, state, postalCode, brief, budget, items, ownerRef, couponCode } = req.body || {};
 		if (!firstName || !lastName || !email) {
 			return res.status(400).json({ error: 'Missing required fields' });
 		}
@@ -38,12 +39,42 @@ router.post('/public', async (req, res) => {
 		}
 
 		const safeItems = Array.isArray(items) ? items : [];
-		const total = safeItems.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 1)), 0);
+		const subtotal = safeItems.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 1)), 0);
+
+		// Re-validate the coupon against the database rather than trusting any
+		// discount the client may have calculated — the client's number is only
+		// ever used for display before this point.
+		let discount = 0;
+		let appliedCoupon = null;
+		const code = String(couponCode || '').trim();
+		if (code) {
+			try {
+				const { findCouponByCode, isCouponUsable } = require('./promotions');
+				const coupon = await findCouponByCode(code);
+				const usable = isCouponUsable(coupon);
+				if (usable.ok) {
+					discount = coupon.coupon_type === 'fixed'
+						? Math.min(Number(coupon.amount || 0), subtotal)
+						: subtotal * (Number(coupon.amount || 0) / 100);
+					appliedCoupon = { id: coupon.id, code: coupon.code, coupon_type: coupon.coupon_type, amount: coupon.amount };
+					// Best-effort usage increment — must never block order creation.
+					if (coupon._source === 'coupons') {
+					supabase.from('coupons').update({ used_count: Number(coupon.used_count || 0) + 1 }).eq('id', coupon.id)
+						.then(() => {})
+						.catch((e) => console.warn('[Orders] Coupon usage increment failed (non-blocking):', e));
+					}
+				}
+			} catch (e) {
+				console.warn('[Orders] Coupon re-validation failed (non-blocking):', e);
+			}
+		}
+
+		const total = Math.max(0, (subtotal || Number(budget || 0) || 0) - discount);
 
 		const order = await Order.create({
 			customer_id: customer.id,
 			status: 'pending',
-			total: total || Number(budget || 0) || 0,
+			total,
 			items: {
 				source: 'website-whatsapp',
 				owner_ref: ownerRef || null,
@@ -59,6 +90,9 @@ router.post('/public', async (req, res) => {
 				city: city || null,
 				state: state || null,
 				postalCode: postalCode || null,
+				subtotal,
+				discount,
+				coupon: appliedCoupon,
 				items: safeItems
 			}
 		});

@@ -208,6 +208,45 @@
       document.getElementById('detailUpdatedAt').textContent = formatDateTime(order.updated_at || order.created_at);
       document.getElementById('detailItemCount').textContent = String(normalizeOrderItems(order.items).length);
 
+      const productCardItems = normalizeOrderItems(order.items);
+      const cardsContainer = document.getElementById('detailProductCards');
+      if (cardsContainer) {
+        if (!productCardItems.length) {
+          cardsContainer.innerHTML = '<div style="padding:1rem;border:0.0625rem dashed var(--border-light);border-radius:0.9rem;color:var(--text-tertiary);text-align:center;grid-column:1/-1;">No products on this order.</div>';
+        } else {
+          cardsContainer.innerHTML = productCardItems.map((item) => {
+            const name = item.name || item.product_name || 'Unnamed product';
+            const thumb = item.img || item.thumbnail_url || '';
+            const price = Number(item.price || 0);
+            const qty = Number(item.qty || 1);
+            const lineTotal = price * qty;
+            return `
+              <div style="display:flex;gap:0.75rem;padding:0.75rem;border:0.0625rem solid var(--border-light);border-radius:0.75rem;background:var(--bg-secondary);align-items:center;">
+                ${thumb ? `<img src="${escapeHtml(thumb)}" alt="${escapeHtml(name)}" style="width:3.5rem;height:3.5rem;object-fit:cover;border-radius:0.5rem;flex-shrink:0;" onerror="this.style.display='none'">` : '<div style="width:3.5rem;height:3.5rem;border-radius:0.5rem;background:var(--bg-tertiary);flex-shrink:0;"></div>'}
+                <div style="min-width:0;">
+                  <div style="font-weight:600;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(name)}</div>
+                  <div style="color:var(--text-secondary);font-size:0.8rem;">$${formatCurrency(price)} x ${qty}</div>
+                  <div style="color:var(--text-tertiary);font-size:0.8rem;">Line total: $${formatCurrency(lineTotal)}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      const rawItemsForSummary = order.items;
+      const parsedForSummary = typeof rawItemsForSummary === 'string'
+        ? (() => { try { return JSON.parse(rawItemsForSummary); } catch { return {}; } })()
+        : (rawItemsForSummary || {});
+      const subtotalVal = Number(parsedForSummary.subtotal || 0);
+      const discountVal = Number(parsedForSummary.discount || 0);
+      const couponInfo = parsedForSummary.coupon || null;
+      document.getElementById('detailSubtotal').textContent = subtotalVal ? '$' + formatCurrency(subtotalVal) : '-';
+      document.getElementById('detailDiscount').textContent = discountVal ? '-$' + formatCurrency(discountVal) : '-';
+      document.getElementById('detailCouponCode').textContent = couponInfo && couponInfo.code
+        ? `${couponInfo.code} (${couponInfo.coupon_type === 'fixed' ? '$' + formatCurrency(couponInfo.amount) : formatCurrency(couponInfo.amount) + '%'})`
+        : 'None';
+
       const modal = document.getElementById('orderDetailModal');
       modal.style.display = 'flex';
       modal.setAttribute('aria-hidden', 'false');
@@ -513,6 +552,14 @@
               </select>
             </td>
             <td style="padding:1rem;text-align:right;font-weight:600;">$${orderTotal}</td>
+            <td style="padding:1rem;text-align:right;">${(() => {
+              const raw = order.items;
+              const parsed = typeof raw === 'string' ? (() => { try { return JSON.parse(raw); } catch { return {}; } })() : (raw || {});
+              const discount = Number(parsed.discount || 0);
+              const couponCode = parsed.coupon && parsed.coupon.code ? parsed.coupon.code : '';
+              if (!discount) return '<span style="color:var(--text-tertiary);">-</span>';
+              return `<span style="color:#4caf50;font-weight:600;">-$${formatCurrency(discount)}</span>` + (couponCode ? `<div style="font-size:0.75rem;color:var(--text-tertiary);">${escapeHtml(couponCode)}</div>` : '');
+            })()}</td>
             <td style="padding:1rem;">${escapeHtml(orderItems.length ? `${orderItems.length} item${orderItems.length === 1 ? '' : 's'}` : 'No items')}</td>
             <td style="padding:1rem;">${escapeHtml(formatDateTime(order.created_at))}</td>
             <td style="padding:1rem;">${escapeHtml(formatDateTime(order.updated_at || order.created_at))}</td>
