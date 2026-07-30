@@ -1084,6 +1084,92 @@ async function applyCoupon() {
 }
 window.applyCoupon = applyCoupon;
 
+function autoApplyCouponFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('promo_code') || params.get('coupon_code') || params.get('coupon') || params.get('code');
+    if (!code) return;
+    const input = document.getElementById('couponCode');
+    if (!input) return;
+    input.value = code;
+    applyCoupon();
+  } catch (e) {
+    console.warn('Auto-apply coupon from URL failed:', e);
+  }
+}
+
+function autoAddProductFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product') || params.get('id');
+    if (!productId) return;
+    fetch('/api/products/' + encodeURIComponent(productId))
+      .then((res) => (res.ok ? res.json() : null))
+      .then((product) => {
+        if (!product || !product.name) return;
+        const image = (Array.isArray(product.images) && product.images.length)
+          ? (product.images.find((i) => i.is_thumbnail || i.is_primary) || product.images[0])
+          : null;
+        const imgPath = image ? (image.image_url || image.url || image.path || '') : (product.thumbnail_url || '');
+        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href);
+      })
+      .catch((e) => console.warn('Auto-add product from URL failed:', e));
+  } catch (e) {
+    console.warn('Auto-add product from URL failed:', e);
+  }
+}
+
+if (document.getElementById('couponCode')) {
+  window.addEventListener('load', () => {
+    autoAddProductFromUrl();
+    setTimeout(autoApplyCouponFromUrl, 400);
+  }, { once: true });
+}
+
+
+function autoApplyCouponFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('promo_code') || params.get('coupon_code') || params.get('coupon') || params.get('code');
+    if (!code) return;
+    const input = document.getElementById('couponCode');
+    if (!input) return;
+    input.value = code;
+    applyCoupon();
+  } catch (e) {
+    console.warn('Auto-apply coupon from URL failed:', e);
+  }
+}
+
+function autoAddProductFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product') || params.get('id');
+    if (!productId) return;
+    fetch('/api/products/' + encodeURIComponent(productId))
+      .then((res) => (res.ok ? res.json() : null))
+      .then((product) => {
+        if (!product || !product.name) return;
+        const image = (Array.isArray(product.images) && product.images.length)
+          ? (product.images.find((i) => i.is_thumbnail || i.is_primary) || product.images[0])
+          : null;
+        const imgPath = image ? (image.image_url || image.url || image.path || '') : (product.thumbnail_url || '');
+        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href);
+      })
+      .catch((e) => console.warn('Auto-add product from URL failed:', e));
+  } catch (e) {
+    console.warn('Auto-add product from URL failed:', e);
+  }
+}
+
+if (document.getElementById('couponCode')) {
+  window.addEventListener('load', () => {
+    autoAddProductFromUrl();
+    setTimeout(autoApplyCouponFromUrl, 400);
+  }, { once: true });
+}
+
+
 
 function removeCoupon() {
   appliedCoupon = null;
