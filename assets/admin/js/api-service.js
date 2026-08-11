@@ -539,6 +539,13 @@ const PromotionsService = {
     });
   },
 
+  async updateAd(id, payload) {
+    return apiCall(`/promotions/ads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  },
+
   async getCoupons() {
     return apiCall('/promotions/coupons');
   },

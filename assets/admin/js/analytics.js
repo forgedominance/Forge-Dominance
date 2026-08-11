@@ -42,7 +42,12 @@
       document.getElementById('statPageViews').textContent = totalPageViews;
       document.getElementById('statActions').textContent = totalActions;
       document.getElementById('statAvgSession').textContent = avgPages + ' pg/visit';
-      document.getElementById('statTopPage').textContent = topPage ? topPage[0].replace(/^\//,'').slice(0,18) || '/' : '--';
+      let topPageLabel = '--';
+      if (topPage) {
+        const rawPath = topPage[0];
+        topPageLabel = rawPath === '/' ? 'Homepage' : (rawPath.replace(/^\//,'').slice(0,18) || 'Homepage');
+      }
+      document.getElementById('statTopPage').textContent = topPageLabel;
       document.getElementById('statBounceRate').textContent = bounceRate + '%';
     }
 
@@ -56,8 +61,9 @@
         const rows = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
         customersSummary.textContent = `${rows.length} visitors (${currentSince})`;
         updateAnalyticsDashboard(rows);
+        renderTopCountries(rows);
         if (!rows.length) {
-          customersBody.innerHTML = '<tr><td colspan="7" style="padding:1rem;color:var(--text-tertiary);">No visitors found.</td></tr>';
+          customersBody.innerHTML = '<tr><td colspan="8" style="padding:1rem;color:var(--text-tertiary);">No visitors found.</td></tr>';
           return;
         }
 
@@ -68,6 +74,7 @@
           <tr>
             <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);">${escapeHtml(String(latestVisitor))}</td>
             <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);">${escapeHtml(v.ip || '-')}</td>
+            <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);"><span class="country-cell"><span>${v.flag || ''}</span><span>${escapeHtml(v.country || 'Unknown')}</span></span></td>
             <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);">${formatDate(v.lastSeen)}</td>
             <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);">${v.pageViews || 0}</td>
             <td style="padding:0.9rem;border-bottom:0.0625rem solid var(--border-light);">${v.actions || 0}</td>
@@ -77,12 +84,43 @@
         `}).join('');
       } catch (error) {
         customersSummary.textContent = 'Load failed';
-        customersBody.innerHTML = `<tr><td colspan="7" style="padding:1rem;color:var(--error-400);">${escapeHtml(error.message || 'Could not load visitors')}</td></tr>`;
+        customersBody.innerHTML = `<tr><td colspan="8" style="padding:1rem;color:var(--error-400);">${escapeHtml(error.message || 'Could not load visitors')}</td></tr>`;
       }
+    }
+
+    function renderTopCountries(rows) {
+      const container = document.getElementById('topCountriesContainer');
+      if (!container) return;
+      const counts = {};
+      const flags = {};
+      rows.forEach(v => {
+        const name = v.country || 'Unknown';
+        counts[name] = (counts[name] || 0) + (v.count || 1);
+        flags[name] = v.flag || '';
+      });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      if (!entries.length) {
+        container.innerHTML = '<div style="color:var(--text-tertiary);font-size:0.85rem;">No data yet.</div>';
+        return;
+      }
+      const max = entries[0][1];
+      container.innerHTML = entries.map(([name, count]) => {
+        const pct = max > 0 ? Math.round((count / max) * 100) : 0;
+        return `
+          <div class="country-row">
+            <span class="country-flag">${flags[name] || ''}</span>
+            <span class="country-name">${escapeHtml(name)}</span>
+            <span class="country-bar-track"><span class="country-bar-fill" style="width:${pct}%;"></span></span>
+            <span class="country-count">${count}</span>
+          </div>`;
+      }).join('');
     }
 
     function applySinceFilter(since) {
       currentSince = since || 'all';
+      document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-since') === currentSince);
+      });
       loadVisitorsSummary();
     }
 
@@ -123,7 +161,7 @@
 
         const filtered = filteredAll.slice(0,200);
         if (!filtered.length) {
-          customersBody.innerHTML = `<tr><td colspan="7" style="padding:1rem;color:var(--text-tertiary);">No events for ${escapeHtml(visitorId)}</td></tr>`;
+          customersBody.innerHTML = `<tr><td colspan="8" style="padding:1rem;color:var(--text-tertiary);">No events for ${escapeHtml(visitorId)}</td></tr>`;
           customersSummary.textContent = `${escapeHtml(visitorId)} · 0 events`;
           return;
         }
@@ -244,7 +282,7 @@
               <td style="padding:0.5rem;border-bottom:0.0625rem solid var(--border-light);"><button class="btn" onclick="document.getElementById('${detailsId}').style.display = document.getElementById('${detailsId}').style.display === 'none' ? 'table-row' : 'none'">Toggle Timeline</button></td>
             </tr>
             <tr id="${detailsId}" style="display:none;background:var(--card-bg);">
-              <td colspan="7" style="padding:0.4rem;">
+              <td colspan="8" style="padding:0.4rem;">
                 ${pagesHtml || `<div style="font-size:0.9rem;margin-bottom:0.4rem;color:var(--text-tertiary);">Clicks: ${escapeHtml(clicks.slice(0,8).join(', ') || '-')}</div>`}
                 <table style="width:100%;border-collapse:collapse;">
                   <thead>
@@ -271,9 +309,9 @@
 
         out += `</tbody></table>`;
 
-        customersBody.innerHTML = `<tr><td colspan="7" style="padding:0.4rem;">${out}</td></tr>` + `<tr><td colspan="7" style="padding:0.6rem;"><button class="btn" onclick="loadVisitorsSummary()">Back to visitors</button></td></tr>`;
+        customersBody.innerHTML = `<tr><td colspan="8" style="padding:0.4rem;">${out}</td></tr>` + `<tr><td colspan="8" style="padding:0.6rem;"><button class="btn" onclick="loadVisitorsSummary()">Back to visitors</button></td></tr>`;
       } catch (err) {
-        customersBody.innerHTML = `<tr><td colspan="7" style="padding:1rem;color:var(--error-400);">${escapeHtml(err.message || 'Could not load details')}</td></tr>`;
+        customersBody.innerHTML = `<tr><td colspan="8" style="padding:1rem;color:var(--error-400);">${escapeHtml(err.message || 'Could not load details')}</td></tr>`;
       }
     }
 

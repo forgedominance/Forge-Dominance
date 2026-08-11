@@ -7,7 +7,7 @@
   <title>Forge Dominance • Forge Dominance Forge Dominance</title>
   <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
   <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
-  <link rel="stylesheet" href="/assets/admin/css/analytics.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/analytics.css?v=20260808">
 </head>
 <body onload="requireAuth();">
   <div class="admin-container">
@@ -72,21 +72,29 @@
         </div>
       </section>
 
+      <div class="top-countries-card">
+        <div class="top-countries-title">Top Countries</div>
+        <div id="topCountriesContainer"><div style="color:var(--text-tertiary);font-size:0.85rem;">Loading...</div></div>
+      </div>
+
       <section class="chart-card">
         <div class="section-header">
-          <div class="section-title"><span class="section-subtitle">Live route</span><h2>Visitor Activity</h2></div>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
-              <div style="display:flex;gap:0.4rem;align-items:center;">
-                <button class="btn" onclick="applySinceFilter('1h')">1h</button>
-                <button class="btn" onclick="applySinceFilter('2h')">2h</button>
-                <button class="btn" onclick="applySinceFilter('3h')">3h</button>
-                <button class="btn" onclick="applySinceFilter('4h')">4h</button>
-                <button class="btn" onclick="applySinceFilter('8h')">8h</button>
-                <button class="btn" onclick="applySinceFilter('12h')">12h</button>
-                <button class="btn" onclick="applySinceFilter('24h')">24h</button>
-                <button class="btn" onclick="applySinceFilter('7d')">7d</button>
-                <button class="btn" onclick="applySinceFilter('30d')">30d</button>
-                <button class="btn" onclick="applySinceFilter('all')">All</button>
+          <div class="section-title">
+            <span class="section-subtitle live-indicator"><span class="live-dot"></span>Live route</span>
+            <h2>Visitor Activity</h2>
+          </div>
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+              <div class="time-filter-group" id="timeFilterGroup">
+                <button class="time-filter-btn" data-since="1h" onclick="applySinceFilter('1h')">1h</button>
+                <button class="time-filter-btn" data-since="2h" onclick="applySinceFilter('2h')">2h</button>
+                <button class="time-filter-btn" data-since="3h" onclick="applySinceFilter('3h')">3h</button>
+                <button class="time-filter-btn" data-since="4h" onclick="applySinceFilter('4h')">4h</button>
+                <button class="time-filter-btn" data-since="8h" onclick="applySinceFilter('8h')">8h</button>
+                <button class="time-filter-btn" data-since="12h" onclick="applySinceFilter('12h')">12h</button>
+                <button class="time-filter-btn active" data-since="24h" onclick="applySinceFilter('24h')">24h</button>
+                <button class="time-filter-btn" data-since="7d" onclick="applySinceFilter('7d')">7d</button>
+                <button class="time-filter-btn" data-since="30d" onclick="applySinceFilter('30d')">30d</button>
+                <button class="time-filter-btn" data-since="all" onclick="applySinceFilter('all')">All</button>
               </div>
               <span class="pill" id="customersSummary">Loading...</span>
             </div>
@@ -97,6 +105,7 @@
               <tr>
                 <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Visitor</th>
                 <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">IP</th>
+                <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Country</th>
                 <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Last Seen</th>
                 <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Page Views</th>
                 <th style="text-align:left;padding:0.9rem;border-bottom:0.0625rem solid var(--border-color);">Actions</th>
@@ -117,7 +126,7 @@
   <script src="../assets/js/site-settings.js?v=20260613" defer></script>
   <script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
   <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
-  <script src="/assets/admin/js/analytics.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/analytics.js?v=20260808b" defer></script>
   <script src="/assets/admin/js/session-timeout.js" defer></script>
 </body>
 </html>

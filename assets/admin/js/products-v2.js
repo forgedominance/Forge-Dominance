@@ -725,3 +725,147 @@
 })();
 
 
+
+/* ─── Sale Tab (appended) ─── */
+(function(){
+  const saleTabBtn = document.querySelector('.tab[data-tab="sale"]');
+  const salePanel = document.getElementById('panel-sale');
+  if (!saleTabBtn || !salePanel) return;
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + btn.dataset.tab));
+    });
+  });
+
+  const statusText = document.getElementById('saleStatusText');
+  const statusBox = document.getElementById('saleStatusBox');
+  const discountInput = document.getElementById('saleDiscountInput');
+  const durationInput = document.getElementById('saleDurationInput');
+  const durationUnit = document.getElementById('saleDurationUnit');
+  const startBtn = document.getElementById('saleStartBtn');
+  const endBtn = document.getElementById('saleEndBtn');
+  const nameInput = document.getElementById('saleNameInput');
+  const scheduleInput = document.getElementById('saleScheduleInput');
+  const adSelect = document.getElementById('saleAdSelect');
+
+  let countdownTimer = null;
+
+  function fmtRemaining(ms) {
+    if (ms <= 0) return 'Ended';
+    const totalMin = Math.floor(ms / 60000);
+    const days = Math.floor(totalMin / 1440);
+    const hours = Math.floor((totalMin % 1440) / 60);
+    const mins = totalMin % 60;
+    const parts = [];
+    if (days) parts.push(days + 'd');
+    if (hours || days) parts.push(hours + 'h');
+    parts.push(mins + 'm');
+    return parts.join(' ') + ' remaining';
+  }
+
+  function renderStatus(sale) {
+    if (countdownTimer) clearInterval(countdownTimer);
+    if (sale && !sale.active && sale.scheduledStartAt && new Date(sale.scheduledStartAt).getTime() > Date.now()) {
+      statusText.textContent = (sale.saleName ? sale.saleName + ' — ' : '') + 'Scheduled to start ' + new Date(sale.scheduledStartAt).toLocaleString();
+      statusBox.style.borderColor = '#F2B35B';
+      return;
+    }
+    if (!sale || !sale.active || !sale.endsAt) {
+      statusText.textContent = 'No sale currently running.';
+      statusBox.style.borderColor = 'var(--border-color)';
+      return;
+    }
+    const endsAtMs = new Date(sale.endsAt).getTime();
+    const update = () => {
+      const remaining = endsAtMs - Date.now();
+      if (remaining <= 0) {
+        statusText.textContent = 'Sale just ended.';
+        clearInterval(countdownTimer);
+        return;
+      }
+      statusText.textContent = (sale.saleName ? sale.saleName + ' — ' : '') + 'Sale live: -' + sale.discountPercent + '% off everything - ' + fmtRemaining(remaining);
+    };
+    update();
+    statusBox.style.borderColor = '#4ADE80';
+    countdownTimer = setInterval(update, 1000);
+  }
+
+  async function loadSaleStatus() {
+    try {
+      const res = await fetch('/api/settings/public');
+      const json = await res.json();
+      renderStatus(json && json.data && json.data.activeSale);
+    } catch (e) {
+      statusText.textContent = 'Could not load sale status.';
+    }
+  }
+
+  startBtn.addEventListener('click', async () => {
+    const discountPercent = Number(discountInput.value);
+    const durationValue = Number(durationInput.value);
+    const unit = durationUnit.value;
+    const durationHours = unit === 'days' ? durationValue * 24 : durationValue;
+    if (!discountPercent || discountPercent < 1 || discountPercent > 90) {
+      alert('Enter a discount between 1 and 90.');
+      return;
+    }
+    if (!durationValue || durationValue <= 0) {
+      alert('Enter how long the sale should run.');
+      return;
+    }
+    startBtn.disabled = true;
+    startBtn.textContent = 'Starting...';
+    try {
+      const body = { discountPercent, durationHours };
+      if (nameInput && nameInput.value.trim()) body.saleName = nameInput.value.trim();
+      if (scheduleInput && scheduleInput.value) body.scheduledStartAt = new Date(scheduleInput.value).toISOString();
+      if (adSelect && adSelect.value) body.linkedAdId = adSelect.value;
+      const res = await fetch('/api/settings/sale/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TokenManager.accessToken },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to start sale');
+      renderStatus(json.activeSale);
+    } catch (e) {
+      alert(e.message || 'Failed to start sale');
+    } finally {
+      startBtn.disabled = false;
+      startBtn.textContent = 'Start Sale';
+    }
+  });
+
+  endBtn.addEventListener('click', async () => {
+    if (!confirm('End the sale now? Prices will revert immediately.')) return;
+    endBtn.disabled = true;
+    try {
+      const res = await fetch('/api/settings/sale/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TokenManager.accessToken }
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to end sale');
+      renderStatus(json.activeSale);
+    } catch (e) {
+      alert(e.message || 'Failed to end sale');
+    } finally {
+      endBtn.disabled = false;
+    }
+  });
+
+  async function loadAdOptions() {
+    try {
+      const res = await fetch('/api/promotions/ads', { headers: { 'Authorization': 'Bearer ' + TokenManager.accessToken } });
+      const json = await res.json();
+      const ads = Array.isArray(json?.data) ? json.data : [];
+      adSelect.innerHTML = '<option value="">None</option>' + ads.map(a => `<option value="${a.id}">${(a.title || 'Untitled').replace(/</g, '&lt;')}</option>`).join('');
+    } catch (e) { /* leave default option */ }
+  }
+
+  loadSaleStatus();
+  loadAdOptions();
+})();
+

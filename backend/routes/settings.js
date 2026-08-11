@@ -387,7 +387,8 @@ router.get('/public', async (_req, res) => {
     const globalVal = settingsRow?.value || {};
     const ageGateEnabled = globalVal.ageGateEnabled !== false;
     const socialLinks = normalizeSocialLinks(globalVal.socialLinks || DEFAULT_SETTINGS.socialLinks);
-    res.json({ data: { ...(siteSettings || normalizeSiteSettings(DEFAULT_SITE_SETTINGS)), ageGateEnabled, socialLinks } });
+    const activeSale = normalizeActiveSale(globalVal.activeSale);
+    res.json({ data: { ...(siteSettings || normalizeSiteSettings(DEFAULT_SITE_SETTINGS)), ageGateEnabled, socialLinks, activeSale } });
   } catch (error) {
     console.error('[Settings] Error:', error);
     res.status(500).json({ error: 'An internal server error occurred' });
@@ -455,6 +456,21 @@ router.put('/me', authenticate, async (req, res) => {
   }
 });
 
+function normalizeActiveSale(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const discountPercent = Math.max(1, Math.min(90, Math.round(Number(r.discountPercent) || 0)));
+  const startedAt = r.startedAt || null;
+  const endsAt = r.endsAt || null;
+  const endsAtMs = endsAt ? new Date(endsAt).getTime() : 0;
+  const active = !!r.active && !!endsAt && endsAtMs > Date.now() && discountPercent > 0;
+  const saleName = r.saleName ? String(r.saleName).trim().slice(0, 80) : null;
+  const linkedAdId = r.linkedAdId || null;
+  const scheduledStartAt = r.scheduledStartAt || null;
+  const scheduledDiscountPercent = r.scheduledDiscountPercent ? Math.max(1, Math.min(90, Math.round(Number(r.scheduledDiscountPercent) || 0))) : null;
+  const scheduledDurationHours = r.scheduledDurationHours ? Math.max(0.1, Number(r.scheduledDurationHours)) : null;
+  return { active, discountPercent, startedAt, endsAt, saleName, linkedAdId, scheduledStartAt, scheduledDiscountPercent, scheduledDurationHours };
+}
+
 router.put('/', authenticate, authorize('admin'), async (req, res) => {
   try {
     const existing = await loadCurrentMailSettings().catch(() => ({}));
@@ -487,6 +503,7 @@ router.put('/', authenticate, authorize('admin'), async (req, res) => {
       roles: Array.isArray(body.roles) ? body.roles : (Array.isArray(existing.roles) ? existing.roles : DEFAULT_SETTINGS.roles),
       theme: pick('theme', DEFAULT_SETTINGS.theme),
       socialLinks: normalizeSocialLinks('socialLinks' in body ? body.socialLinks : existing.socialLinks),
+      activeSale: normalizeActiveSale('activeSale' in body ? body.activeSale : existing.activeSale),
       ageGateEnabled: 'ageGateEnabled' in body ? !!body.ageGateEnabled : (existing.ageGateEnabled !== false),
       stripe: 'stripe' in body ? normalizeStripeSettings(body.stripe, existing.stripe) : (existing.stripe || { enabled: false }),
       siteName: pick('siteName', DEFAULT_SITE_SETTINGS.siteName),
@@ -597,6 +614,53 @@ router.put('/', authenticate, authorize('admin'), async (req, res) => {
   } catch (error) {
     console.error('[Settings] Error:', error);
     res.status(500).json({ error: 'An internal server error occurred' });
+  }
+});
+
+router.post('/sale/start', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const discountPercent = Math.max(1, Math.min(90, Math.round(Number(req.body?.discountPercent) || 0)));
+    const durationHours = Math.max(0.1, Number(req.body?.durationHours) || 24);
+    const saleName = req.body?.saleName ? String(req.body.saleName).trim().slice(0, 80) : null;
+    const linkedAdId = req.body?.linkedAdId || null;
+    const scheduledStartAt = req.body?.scheduledStartAt ? new Date(req.body.scheduledStartAt).toISOString() : null;
+    if (!discountPercent) return res.status(400).json({ error: 'discountPercent must be between 1 and 90' });
+
+    const isFutureSchedule = !!(scheduledStartAt && new Date(scheduledStartAt).getTime() > Date.now() + 60000);
+
+    let activeSale;
+    if (isFutureSchedule) {
+      activeSale = { active: false, discountPercent, startedAt: null, endsAt: null, saleName, linkedAdId, scheduledStartAt, scheduledDiscountPercent: discountPercent, scheduledDurationHours: durationHours };
+    } else {
+      const startedAt = new Date().toISOString();
+      const endsAt = new Date(Date.now() + durationHours * 60 * 60 * 1000).toISOString();
+      activeSale = { active: true, discountPercent, startedAt, endsAt, saleName, linkedAdId, scheduledStartAt: null, scheduledDiscountPercent: null, scheduledDurationHours: null };
+    }
+
+    const existingRow = await safeSingle(supabase.from('admin_settings').select('value').eq('key', 'global').limit(1)).catch(() => null);
+    const existingValue = (existingRow && existingRow.value) || {};
+    const nextValue = { ...existingValue, activeSale };
+    await supabase.from('admin_settings').upsert({ key: 'global', value: nextValue, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+
+    res.json({ ok: true, activeSale });
+  } catch (error) {
+    console.error('[Settings] Sale start error:', error);
+    res.status(500).json({ error: 'Could not start sale' });
+  }
+});
+
+router.post('/sale/end', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const existingRow = await safeSingle(supabase.from('admin_settings').select('value').eq('key', 'global').limit(1)).catch(() => null);
+    const existingValue = (existingRow && existingRow.value) || {};
+    const prevSale = existingValue.activeSale || {};
+    const activeSale = { ...prevSale, active: false, scheduledStartAt: null, scheduledDiscountPercent: null, scheduledDurationHours: null, linkedAdId: null };
+    const nextValue = { ...existingValue, activeSale };
+    await supabase.from('admin_settings').upsert({ key: 'global', value: nextValue, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    res.json({ ok: true, activeSale });
+  } catch (error) {
+    console.error('[Settings] Sale end error:', error);
+    res.status(500).json({ error: 'Could not end sale' });
   }
 });
 
@@ -827,3 +891,25 @@ router.delete('/roles/:id', authenticate, authorize('superadmin'), async (req, r
 module.exports = router;
 
 
+
+
+// Periodic check: activate any scheduled sale whose start time has arrived
+setInterval(async () => {
+  try {
+    const existingRow = await safeSingle(supabase.from('admin_settings').select('value').eq('key', 'global').limit(1)).catch(() => null);
+    const existingValue = (existingRow && existingRow.value) || {};
+    const sale = existingValue.activeSale;
+    if (!sale || sale.active || !sale.scheduledStartAt) return;
+    if (new Date(sale.scheduledStartAt).getTime() > Date.now()) return;
+    const discountPercent = sale.scheduledDiscountPercent || sale.discountPercent;
+    const durationHours = sale.scheduledDurationHours || 24;
+    const startedAt = new Date().toISOString();
+    const endsAt = new Date(Date.now() + durationHours * 60 * 60 * 1000).toISOString();
+    const activeSale = { ...sale, active: true, startedAt, endsAt, discountPercent, scheduledStartAt: null, scheduledDiscountPercent: null, scheduledDurationHours: null };
+    const nextValue = { ...existingValue, activeSale };
+    await supabase.from('admin_settings').upsert({ key: 'global', value: nextValue, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    console.log('[Settings] Scheduled sale activated:', activeSale.saleName || '(unnamed)');
+  } catch (e) {
+    console.error('[Settings] Scheduled sale check failed:', e.message);
+  }
+}, 60000);

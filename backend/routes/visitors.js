@@ -4,6 +4,30 @@ const { authenticate } = require('../middleware/auth');
 const { isMissingTableError } = require('../lib/dbUtils');
 const redis = require('../lib/redisClient');
 const visitorBuffer = require('../lib/visitorBuffer');
+const geoip = require('geoip-lite');
+
+let regionNames = null;
+try { regionNames = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) { regionNames = null; }
+
+function countryCodeToFlag(cc) {
+  if (!cc || cc.length !== 2) return '';
+  return cc.toUpperCase().replace(/./g, ch => String.fromCodePoint(127397 + ch.charCodeAt(0)));
+}
+
+function getGeoInfo(ip) {
+  const clean = String(ip || '').replace('::ffff:', '');
+  if (!clean || clean === '::1' || clean === '127.0.0.1' || clean.startsWith('192.168.') || clean.startsWith('10.') || clean === 'unknown') {
+    return { country: 'Local', countryCode: null, flag: '\uD83D\uDDA5\uFE0F' };
+  }
+  try {
+    const geo = geoip.lookup(clean);
+    if (!geo || !geo.country) return { country: 'Unknown', countryCode: null, flag: '\uD83C\uDFF3\uFE0F' };
+    const name = regionNames ? (regionNames.of(geo.country) || geo.country) : geo.country;
+    return { country: name, countryCode: geo.country, flag: countryCodeToFlag(geo.country) };
+  } catch (e) {
+    return { country: 'Unknown', countryCode: null, flag: '\uD83C\uDFF3\uFE0F' };
+  }
+}
 
 const router = express.Router();
 
@@ -334,8 +358,13 @@ router.get('/summary-by-ip', authenticate, async (req, res) => {
       if (new Date(entry.created_at) > new Date(v.lastSeen)) v.lastSeen = entry.created_at;
     });
 
-    const grouped = Array.from(byIp.values()).map((v) => ({
+    const grouped = Array.from(byIp.values()).map((v) => {
+      const geo = getGeoInfo(v.ip);
+      return {
       ip: v.ip,
+      country: geo.country,
+      countryCode: geo.countryCode,
+      flag: geo.flag,
       count: v.visitorIds.size,
       pageViews: v.pageViews,
       actions: v.actions,
@@ -357,7 +386,8 @@ router.get('/summary-by-ip', authenticate, async (req, res) => {
           paths: Array.from(visitor.paths).slice(0, 10).join(', ')
         };
       }).sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen))
-    }));
+      };
+    });
 
     grouped.sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen));
 

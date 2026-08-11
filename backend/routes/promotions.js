@@ -88,6 +88,7 @@ function normalizeAdRecord(row) {
     image_path: row.image_path || null,
     click_url: row.click_url || row.link || null,
     status: row.status || (row.is_active === false ? 'inactive' : 'active'),
+    linked_to_sale: !!row.linked_to_sale,
     notes: row.notes || description || null,
     created_at: row.created_at || null,
     updated_at: row.updated_at || null
@@ -482,16 +483,19 @@ async function clearActivePromoCache() {
 router.get('/ads/public', async (_req, res) => {
   try {
     const result = await redis.getOrFetch('promotions:ads:public', 180, async () => {
-      const [adsResult, legacyResult] = await Promise.all([
+      const [adsResult, legacyResult, settingsResult] = await Promise.all([
         supabase.from('ads').select('*').eq('status', 'active').order('created_at', { ascending: false }),
-        supabase.from('promotions').select('*').eq('type', 'ad').eq('is_active', true).order('created_at', { ascending: false })
+        supabase.from('promotions').select('*').eq('type', 'ad').eq('is_active', true).order('created_at', { ascending: false }),
+        supabase.from('admin_settings').select('value').eq('key', 'global').maybeSingle()
       ]);
       if (adsResult.error && !isMissingTableError(adsResult.error)) throw adsResult.error;
       if (legacyResult.error && !isMissingTableError(legacyResult.error)) throw legacyResult.error;
+      const activeSale = settingsResult?.data?.value?.activeSale || null;
+      const saleIsLive = !!(activeSale && activeSale.active && activeSale.endsAt && new Date(activeSale.endsAt).getTime() > Date.now());
       const combined = [
         ...((adsResult.data || []).map(normalizeAdRecord)),
         ...((legacyResult.data || []).map(normalizeAdRecord))
-      ];
+      ].filter((ad) => !ad.linked_to_sale || saleIsLive);
       const unique = [];
       const seen = new Set();
       combined.forEach((row) => {
@@ -638,6 +642,40 @@ router.post('/ads', authenticate, authorize('admin'), async (req, res) => {
   } catch (error) {
     console.error('[Promotions] Error:', error);
     return res.status(500).json({ error: 'An internal server error occurred' });
+  }
+});
+
+router.put('/ads/:id', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body || {};
+    const payload = {
+      title: body.title,
+      description: body.description,
+      notes: body.description,
+      click_url: body.click_url,
+      image_url: body.image_url,
+      image_path: body.image_path,
+      badge: body.badge || null,
+      kicker: body.kicker || null,
+      cta_label: body.cta_label || null,
+      price: Number.isFinite(Number(body.price)) && Number(body.price) > 0 ? Number(body.price) : null,
+      compare_price: Number.isFinite(Number(body.compare_price)) && Number(body.compare_price) > 0 ? Number(body.compare_price) : null,
+      perk_1: body.perk_1 || null,
+      perk_2: body.perk_2 || null,
+      perk_3: body.perk_3 || null,
+      linked_to_sale: !!body.linked_to_sale,
+      updated_at: new Date().toISOString()
+    };
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+    const { data, error } = await supabase.from('ads').update(payload).eq('id', id).select().single();
+    if (error) throw error;
+    await redis.del('promotions:ads:public').catch(() => {});
+    await redis.del('promotions:ads:admin').catch(() => {});
+    return res.json({ data: normalizeAdRecord(data) });
+  } catch (error) {
+    console.error('[Promotions] Update ad error:', error);
+    return res.status(500).json({ error: 'Could not update ad' });
   }
 });
 

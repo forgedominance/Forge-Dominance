@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/assets/admin/css/theme.css?v=20260613">
   <link rel="stylesheet" href="/assets/admin/css/components.css?v=20260613">
   <link rel="stylesheet" href="/assets/css/products-components.css">
-  <link rel="stylesheet" href="/assets/admin/css/products.css?v=20260613">
+  <link rel="stylesheet" href="/assets/admin/css/products.css?v=20260613&sale=1&sale=1">
 </head>
 <body onload="requireAuth();">
   <div class="admin-container">
@@ -100,7 +100,54 @@
           <button class="tab active" data-tab="featured" type="button">Featured Products</button>
           <button class="tab" data-tab="all" type="button">All Products</button>
           <button class="tab" data-tab="sort-order" type="button">Sort Order</button>
+          <button class="tab" data-tab="sale" type="button">Sale</button>
         </div>
+
+        <section id="panel-sale" class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <h2 style="margin-top:0;margin-bottom:0;">Site-Wide Sale</h2>
+          </div>
+          <div class="card" style="max-width:34rem;padding:1.5rem;">
+            <div id="saleStatusBox" style="margin-bottom:1.25rem;padding:0.9rem;border-radius:0.6rem;background:var(--bg-tertiary);border:0.0625rem solid var(--border-color);">
+              <span id="saleStatusText" style="font-weight:600;">Loading sale status...</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-tertiary);margin-bottom:0.35rem;">Sale Name (optional)</label>
+                <input type="text" id="saleNameInput" maxlength="80" placeholder="Fourth of July Blowout" style="width:100%;">
+              </div>
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-tertiary);margin-bottom:0.35rem;">Discount Percentage</label>
+                <input type="number" id="saleDiscountInput" min="1" max="90" value="15" style="width:100%;">
+              </div>
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-tertiary);margin-bottom:0.35rem;">Run For</label>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                  <input type="number" id="saleDurationInput" min="1" value="24" style="width:100%;">
+                  <select id="saleDurationUnit" style="width:9rem;">
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-tertiary);margin-bottom:0.35rem;">Schedule Start (optional — leave blank to start now)</label>
+                <input type="datetime-local" id="saleScheduleInput" style="width:100%;">
+              </div>
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-tertiary);margin-bottom:0.35rem;">Activate This Ad During Sale (optional)</label>
+                <select id="saleAdSelect" style="width:100%;">
+                  <option value="">None</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:0.75rem;">
+                <button type="button" id="saleStartBtn" class="btn btn-primary">Start Sale</button>
+                <button type="button" id="saleEndBtn" class="btn btn-secondary">End Sale Now</button>
+              </div>
+              <p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">The sale applies a live discount across every product on the storefront and automatically ends the moment the timer runs out.</p>
+            </div>
+          </div>
+        </section>
 
         <section id="panel-featured" class="panel active">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
@@ -305,7 +352,7 @@
 
   <script src="/assets/js/site-settings.js?v=20260613" defer></script><script src="/assets/admin/js/api-service.js?v=20260613" defer></script>
   <script src="/assets/admin/js/utils.js?v=20260613" defer></script>
-  <script src="/assets/admin/js/products-v2.js?v=20260613" defer></script>
+  <script src="/assets/admin/js/products-v2.js?v=20260809?v=20260809?v=20260613" defer></script>
   <script src="/assets/admin/js/session-timeout.js" defer></script>
 </body>
 </html>

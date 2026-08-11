@@ -363,6 +363,40 @@ function isTrueFlag(value) {
   return value === true || value === 'true';
 }
 
+let __activeSaleCache = null;
+async function fetchActiveSaleOnce() {
+  if (__activeSaleCache !== null) return __activeSaleCache;
+  try {
+    const res = await fetch('/api/settings/public');
+    const json = await res.json();
+    __activeSaleCache = (json && json.data && json.data.activeSale && json.data.activeSale.active) ? json.data.activeSale : { active: false };
+  } catch (e) {
+    __activeSaleCache = { active: false };
+  }
+  return __activeSaleCache;
+}
+
+function applyActiveSaleToProduct(p) {
+  const sale = __activeSaleCache;
+  if (sale && sale.active && sale.discountPercent > 0) {
+    const original = p.price;
+    const discounted = Math.round(original * (1 - sale.discountPercent / 100));
+    p.origPrice = original;
+    p.price = discounted;
+    p.__saleEndsAt = sale.endsAt;
+    p.__saleDiscountPercent = sale.discountPercent;
+  }
+  return p;
+}
+
+(function injectSaleStyles(){
+  if (document.getElementById('sale-badge-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'sale-badge-styles';
+  style.textContent = '.sale-badge{display:inline-block;background:linear-gradient(135deg,#E23E3E,#B91C1C);color:#fff;font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:0.25rem 0.55rem;border-radius:0.35rem;margin-bottom:0.4rem}.sale-countdown{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.8rem;color:#E8C98E;margin-top:0.4rem}.pc-img{position:relative}.sale-ribbon-wrap{position:absolute;top:0;right:0;width:6rem;height:6rem;overflow:hidden;z-index:4;pointer-events:none}.sale-ribbon{position:absolute;top:1.1rem;right:-1.6rem;width:8rem;text-align:center;transform:rotate(45deg);background:linear-gradient(135deg,#FF7A1A,#C2410C);color:#fff;font-weight:800;font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.3rem 0;box-shadow:0 0.1rem 0.3rem rgba(0,0,0,0.35)}';
+  document.head.appendChild(style);
+})();
+
 function normalizeProduct(product) {
   const images = Array.isArray(product.images) ? product.images : [];
   const primaryImageFromServer = product.thumbnail_url || product.thumbnailUrl || null;
@@ -396,6 +430,7 @@ function normalizeProduct(product) {
 async function loadCatalog() {
   renderSkeletons();
   try {
+    await fetchActiveSaleOnce();
     const categories = ['Hunters', 'Camp & Trail', 'Skinning Knives', 'Folding Knives'];
     const settled = await Promise.allSettled(categories.map(cat =>
       fetch(`/api/products/category/${encodeURIComponent(cat)}`).then(r => r.ok ? r.json() : [])
@@ -408,7 +443,7 @@ async function loadCatalog() {
       const label = categories[i];
       const key = resolveCategoryKey(label);
       if (!items.length) return;
-      products[key] = items.map(normalizeProduct);
+      products[key] = items.map(normalizeProduct).map(applyActiveSaleToProduct);
       categoryOrder.push({ key, label, description: `Browse all products in ${label}.` });
     });
     if (!activeCategory) activeCategory = categoryOrder[0]?.key || '';
@@ -481,6 +516,7 @@ function renderGrid(category) {
           <img src="${p.img}" alt="${p.name}" loading="lazy"/>
           <div class="pc-fade"></div>
           <div class="pc-tier">${p.tag}</div>
+          ${p.origPrice ? `<div class="sale-ribbon-wrap"><span class="sale-ribbon">${p.__saleDiscountPercent ? '-' + p.__saleDiscountPercent + '%' : 'Sale'}</span></div>` : ''}
         </div>
         <div class="pc-body">
           <div class="pc-cat">${p.tag || 'Featured'}</div>
