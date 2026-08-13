@@ -2131,23 +2131,52 @@ function featuredImage(product) {
   return normalizeFeaturedImageUrl(selectedFromImages || selectedFromApi);
 }
 
-function renderFeaturedCards(products) {
+let __activeSaleCacheHome = null;
+async function fetchActiveSaleOnceHome() {
+  if (__activeSaleCacheHome !== null) return __activeSaleCacheHome;
+  try {
+    const res = await fetch('/api/settings/public');
+    const json = await res.json();
+    __activeSaleCacheHome = (json && json.data && json.data.activeSale && json.data.activeSale.active) ? json.data.activeSale : { active: false };
+  } catch (e) {
+    __activeSaleCacheHome = { active: false };
+  }
+  return __activeSaleCacheHome;
+}
+
+(function injectSaleStylesHome(){
+  if (document.getElementById('sale-badge-styles-home')) return;
+  const style = document.createElement('style');
+  style.id = 'sale-badge-styles-home';
+  style.textContent = '.pc-img{position:relative}.sale-ribbon-wrap{position:absolute;top:0;right:0;width:6rem;height:6rem;overflow:hidden;z-index:4;pointer-events:none}.sale-ribbon{position:absolute;top:1.1rem;right:-1.6rem;width:8rem;text-align:center;transform:rotate(45deg);background:linear-gradient(135deg,#FF7A1A,#C2410C);color:#fff;font-weight:800;font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.3rem 0;box-shadow:0 0.1rem 0.3rem rgba(0,0,0,0.35)}';
+  document.head.appendChild(style);
+})();
+
+async function renderFeaturedCards(products) {
   if (!hsIn) return;
   if (!products.length) {
     hsIn.innerHTML = '<div class="pc"><div class="pc-body"><div class="pc-steel">Featured</div><h3 class="pc-name">No Featured Products Yet</h3><p class="pc-tag">Mark products as featured in admin to show them here.</p></div></div>';
     return;
   }
+  const sale = await fetchActiveSaleOnceHome();
 
   hsIn.innerHTML = products.map((product) => {
     const image = featuredImage(product);
-    const price = Number(product.price || 0);
-    const compare = Number(product.compare_price || 0);
+    let price = Number(product.price || 0);
+    let compare = Number(product.compare_price || 0);
+    let saleDiscountPercent = null;
+    if (sale && sale.active && sale.discountPercent > 0) {
+      compare = price;
+      price = Math.round(price * (1 - sale.discountPercent / 100));
+      saleDiscountPercent = sale.discountPercent;
+    }
     return `
       <div class="pc${String(product.category || '').toLowerCase().includes('collector') ? ' gold-card' : ''}">
         <div class="pc-img">
           <img src="${esc(image)}" alt="${esc(product.name || 'Featured blade')}" loading="lazy"/>
           <div class="pc-fade"></div>
           <div class="pc-tier">${esc(product.category || 'Featured')}</div>
+          ${compare > 0 ? `<div class="sale-ribbon-wrap"><span class="sale-ribbon">${saleDiscountPercent ? '-' + saleDiscountPercent + '%' : 'Sale'}</span></div>` : ''}
         </div>
         <div class="pc-body">
           <div class="pc-cat">${esc(product.category || 'Featured')}</div>

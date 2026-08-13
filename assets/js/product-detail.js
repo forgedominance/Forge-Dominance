@@ -170,10 +170,18 @@ function addToOrderFromDetail(name, steel, price, fallbackImg, productUrl) {
   syncCartBadge();
 }
 
-function renderProduct(product) {
+function renderProduct(product, sale) {
   __currentProduct = product;
   var images = pickGallery(product.images, '');
   var productUrl = window.location.href;
+  var effectivePrice = Number(product.price || 0);
+  var effectiveCompare = Number(product.compare_price || 0);
+  var saleDiscountPercent = null;
+  if (sale && sale.active && sale.discountPercent > 0) {
+    effectiveCompare = effectivePrice;
+    effectivePrice = Math.round(effectivePrice * (1 - sale.discountPercent / 100));
+    saleDiscountPercent = sale.discountPercent;
+  }
   var site = window.BladesmithSiteSettings || window.getBladesmithSiteSettings && window.getBladesmithSiteSettings() || {};
   var siteName = site.siteName || 'Forge Dominance';
   var waNumber = String(site.whatsappNumber || '923298399619').replace(/[^\d]/g, '');
@@ -181,7 +189,7 @@ function renderProduct(product) {
     'Hey! I want to order from ' + siteName + ':',
     '',
     '🛍️ Product: ' + (product.name || 'Custom Blade'),
-    '💰 Price: $' + Number(product.price || 0).toLocaleString(),
+    '💰 Price: $' + effectivePrice.toLocaleString(),
     '',
     'Please confirm availability. Thank you!',
     '',
@@ -205,7 +213,7 @@ function renderProduct(product) {
   var detailRoot = document.getElementById('detailRoot');
   detailRoot.className = '';
   detailRoot.innerHTML = '<section class="p-detail-shell"><div class="p-detail-grid">'
-    + '<div class="p-gallery"><div class="p-main-img">'
+    + '<div class="p-gallery"><div class="p-main-img">' + (saleDiscountPercent ? '<div class="sale-ribbon-wrap"><span class="sale-ribbon">-' + saleDiscountPercent + '%</span></div>' : '')
     + '<img id="mainImg" src="' + escapeHtml(images[0] || '') + '" alt="' + escapeHtml(product.name || 'Product image') + '" fetchpriority="high" />'
     + '<button class="p-arrow left" onclick="prevImage()" aria-label="Previous image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>'
     + '<button class="p-arrow right" onclick="nextImage()" aria-label="Next image"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>'
@@ -215,7 +223,8 @@ function renderProduct(product) {
     + '<div class="p-info">'
     + '<span class="tlabel">' + escapeHtml(product.category || 'Product') + '</span>'
     + '<h1>' + escapeHtml(product.name || 'Unnamed') + '<em>.</em></h1>'
-    + '<div class="p-steel-row"><span class="p-price">$' + Number(product.price || 0).toLocaleString() + (product.compare_price ? '<span class="p-orig">$' + Number(product.compare_price).toLocaleString() + '</span>' : '') + '</span></div>'
+    + '<div class="p-steel-row"><span class="p-price">$' + effectivePrice.toLocaleString() + (effectiveCompare > 0 ? '<span class="p-orig">$' + effectiveCompare.toLocaleString() + '</span>' : '') + '</span></div>'
+    + (saleDiscountPercent ? '<div id="saleCountdownDetail" class="sale-countdown-detail"></div>' : '')
     + ((product.description || '').trim() ? '<p class="p-lead">' + escapeHtml(product.description) + '</p>' : '')
     + ((product.craft_story || '').trim() ? '<div class="p-story"><h4>The Craftsmanship Story</h4><p>' + escapeHtml(product.craft_story) + '</p></div>' : '')
     + (specEntries.length ? '<div class="p-spec-grid">' + specEntries.map(function(pair) { return '<div class="p-spec-cell"><div class="sk">' + pair[0].charAt(0).toUpperCase() + pair[0].slice(1) + '</div><div class="sv">' + escapeHtml(pair[1]) + '</div></div>'; }).join('') + '</div>' : '')
@@ -246,7 +255,7 @@ function renderProduct(product) {
   var addBtn = document.querySelector('.js-add-detail');
   if (addBtn) {
     addBtn.addEventListener('click', function() {
-      addToOrderFromDetail(product.name || '', product.craft_story || product.category || '', Number(product.price || 0), images[0] || '../assets/images/workshop-detail.svg', productUrl || window.location.href);
+      addToOrderFromDetail(product.name || '', product.craft_story || product.category || '', effectivePrice, images[0] || '../assets/images/workshop-detail.svg', productUrl || window.location.href);
     });
   }
 }
@@ -348,6 +357,54 @@ function nextImage() {
   setMainImg(__galleryImages[__galleryIndex], __galleryIndex);
 }
 
+let __activeSaleCache = null;
+async function fetchActiveSaleOnce() {
+  if (__activeSaleCache !== null) return __activeSaleCache;
+  try {
+    var res = await fetch('/api/settings/public');
+    var json = await res.json();
+    __activeSaleCache = (json && json.data && json.data.activeSale && json.data.activeSale.active) ? json.data.activeSale : { active: false };
+  } catch (e) {
+    __activeSaleCache = { active: false };
+  }
+  return __activeSaleCache;
+}
+
+(function injectSaleStylesDetail(){
+  if (document.getElementById('sale-badge-styles-detail')) return;
+  var style = document.createElement('style');
+  style.id = 'sale-badge-styles-detail';
+  style.textContent = '.p-main-img{position:relative}.sale-ribbon-wrap{position:absolute;top:0;right:0;width:6rem;height:6rem;overflow:hidden;z-index:4;pointer-events:none}.sale-ribbon{position:absolute;top:1.1rem;right:-1.6rem;width:8rem;text-align:center;transform:rotate(45deg);background:linear-gradient(135deg,#FF7A1A,#C2410C);color:#fff;font-weight:800;font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.3rem 0;box-shadow:0 0.1rem 0.3rem rgba(0,0,0,0.35)}.sale-countdown-detail{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.85rem;color:#E8C98E;margin-top:0.5rem;font-weight:600}';
+  document.head.appendChild(style);
+})();
+
+let __countdownTimerDetail = null;
+function startSaleCountdownDetail(sale) {
+  if (__countdownTimerDetail) clearInterval(__countdownTimerDetail);
+  var el = document.getElementById('saleCountdownDetail');
+  if (!el || !sale || !sale.active || !sale.endsAt) return;
+  var endsAtMs = new Date(sale.endsAt).getTime();
+  function update() {
+    var remaining = endsAtMs - Date.now();
+    if (remaining <= 0) {
+      el.textContent = '';
+      clearInterval(__countdownTimerDetail);
+      return;
+    }
+    var totalMin = Math.floor(remaining / 60000);
+    var days = Math.floor(totalMin / 1440);
+    var hours = Math.floor((totalMin % 1440) / 60);
+    var mins = totalMin % 60;
+    var parts = [];
+    if (days) parts.push(days + 'd');
+    if (hours || days) parts.push(hours + 'h');
+    parts.push(mins + 'm');
+    el.textContent = '\u23F1 Sale ends in ' + parts.join(' ');
+  }
+  update();
+  __countdownTimerDetail = setInterval(update, 1000);
+}
+
 async function loadDetail() {
   var id = getProductId();
   if (!id) {
@@ -358,9 +415,11 @@ async function loadDetail() {
   }
 
   var product = await fetchProductRecord(id);
+  var sale = await fetchActiveSaleOnce();
   __galleryImages = pickGallery(product.images, '');
   __galleryIndex = 0;
-  renderProduct(product);
+  renderProduct(product, sale);
+  startSaleCountdownDetail(sale);
   window.dispatchEvent(new Event('productDetailReady'));
 }
 
