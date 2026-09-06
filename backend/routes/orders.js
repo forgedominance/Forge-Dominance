@@ -4,6 +4,7 @@ const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const supabase = require('../config/supabase');
 const { authenticate, authorize } = require('../middleware/auth');
+const metaCapi = require('../lib/metaCapi');
 
 const router = express.Router();
 
@@ -98,6 +99,19 @@ router.post('/public', async (req, res) => {
 		});
 
 		res.status(201).json({ message: 'Order lead created', orderId: order.id });
+
+		// Fire Meta Conversions API Purchase event (non-blocking, response already sent)
+		metaCapi.sendEvent({
+			eventName: 'Purchase',
+			req,
+			contentIds: safeItems.map(item => String(item.id || item.product_id || '')).filter(Boolean),
+			contentType: 'product',
+			value: total,
+			currency: 'USD',
+			email,
+			phone,
+			eventId: String(order.id)
+		}).catch(err => console.error('[MetaCAPI] Purchase failed:', err.message));
 	} catch (error) {
 		console.error('[Orders] Error:', error);
 	res.status(500).json({ error: 'An internal server error occurred' });

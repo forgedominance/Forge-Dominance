@@ -126,11 +126,24 @@
     }
 
     // ===== SWITCH FORMS =====
+    // Explicitly hide every form and only unhide the target — never rely on
+    // a form having no class as an implicit "hidden" state, since a bare
+    // <form> defaults to display:block and will show up alongside others.
+    const ALL_FORMS = [loginForm, resetForm, otpForm, newPasswordForm];
+
     function showForm(form) {
-      [loginForm, resetForm, otpForm, newPasswordForm].forEach(f => f.classList.remove('form-active'));
+      ALL_FORMS.forEach(f => {
+        f.classList.remove('form-active');
+        f.classList.add('hidden-form');
+      });
+      form.classList.remove('hidden-form');
       form.classList.add('form-active');
       clearAlert();
     }
+
+    // Ensure only the login form is visible on initial load, regardless of
+    // whatever classes shipped in the HTML.
+    showForm(loginForm);
 
     query('#forgotPasswordLink').addEventListener('click', (e) => {
       e.preventDefault();
@@ -409,5 +422,3 @@
         showAlert(error.message || 'Could not resend reset code', 'error');
       }
     });
-
-

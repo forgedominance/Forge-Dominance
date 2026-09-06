@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const redis = require('../lib/redisClient');
+const metaCapi = require('../lib/metaCapi');
 
 const CACHE_TTL = 120; // 2 minutes
 const MAX_LIMIT = 1000;
@@ -48,6 +49,7 @@ const productController = {
   },
 
   getById: async (req, res) => {
+    console.log('[DEBUG] getById called with id:', req.params.id);
     try {
       const cacheKey = `products:${req.params.id}`;
       const result = await redis.getOrFetch(cacheKey, CACHE_TTL, async () => {
@@ -55,6 +57,14 @@ const productController = {
       });
       if (!result) return res.status(404).json({ error: 'Product not found' });
       res.json(result);
+
+      // Fire Meta Conversions API ViewContent event (non-blocking, response already sent)
+      metaCapi.sendEvent({
+        eventName: 'ViewContent',
+        req,
+        contentIds: [String(req.params.id)],
+        contentType: 'product'
+      }).catch(err => console.error('[MetaCAPI] ViewContent failed:', err.message));
     } catch (error) {
       console.error('[Products] Error:', error);
       res.status(500).json({ error: 'An internal server error occurred' });

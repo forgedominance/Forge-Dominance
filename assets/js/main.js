@@ -129,16 +129,16 @@ function normalizeCartImage(path) {
   }
 }
 
-function addToCart(name, steel, price, img, productUrl) {
+function addToCart(name, steel, price, img, productUrl, id) {
   const existing = cart.find(i => i.name === name);
   const resolvedImg = normalizeCartImage(img);
   const resolvedUrl = String(productUrl || window.location.href || '').trim();
   if (existing) {
     existing.qty += 1;
   } else {
-    cart.push({ name, steel, price, img: resolvedImg, url: resolvedUrl, qty: 1 });
+    cart.push({ name, steel, price, img: resolvedImg, url: resolvedUrl, qty: 1, id: id || name });
   }
-  trackAddToCart({ id: name, name, category: steel, price }, existing ? existing.qty : 1);
+  trackAddToCart({ id: id || name, name, category: steel, price }, existing ? existing.qty : 1);
   saveCartState();
   updateCartUI();
   openCart();
@@ -1111,7 +1111,7 @@ function autoAddProductFromUrl() {
           ? (product.images.find((i) => i.is_thumbnail || i.is_primary) || product.images[0])
           : null;
         const imgPath = image ? (image.image_url || image.url || image.path || '') : (product.thumbnail_url || '');
-        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href);
+        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href, product.id);
       })
       .catch((e) => console.warn('Auto-add product from URL failed:', e));
   } catch (e) {
@@ -1154,7 +1154,7 @@ function autoAddProductFromUrl() {
           ? (product.images.find((i) => i.is_thumbnail || i.is_primary) || product.images[0])
           : null;
         const imgPath = image ? (image.image_url || image.url || image.path || '') : (product.thumbnail_url || '');
-        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href);
+        addToCart(product.name, [product.blade, product.grind, product.tang].filter(Boolean).join(' · ') || 'Custom Build', Number(product.price || 0), imgPath, window.location.href, product.id);
       })
       .catch((e) => console.warn('Auto-add product from URL failed:', e));
   } catch (e) {
@@ -2188,7 +2188,7 @@ async function renderFeaturedCards(products) {
                 <span class="pc-price">$${price.toLocaleString()}</span>
               </div>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;">
-                <button class="pc-btn js-add-order" type="button" data-name="${esc(product.name || 'Unnamed')}" data-steel="${esc(featuredSteel(product))}" data-price="${price}" data-img="${esc(image)}" data-url="${esc('pages/product.html?id=' + encodeURIComponent(String(product.id || '')))}">Add to Order</button>
+                <button class="pc-btn js-add-order" type="button" data-name="${esc(product.name || 'Unnamed')}" data-steel="${esc(featuredSteel(product))}" data-price="${price}" data-img="${esc(image)}" data-url="${esc('pages/product.html?id=' + encodeURIComponent(String(product.id || '')))}" data-id="${esc(String(product.id || ''))}">Add to Order</button>
                 <a class="pc-btn" style="background:transparent;border:1px solid var(--faint);color:var(--plat);" href="pages/product.html?id=${encodeURIComponent(String(product.id || ''))}">Details</a>
               </div>
             </div>
@@ -2215,7 +2215,7 @@ document.addEventListener('click', function(e) {
   const btn = e.target.closest('.js-add-order');
   if (!btn) return;
   e.preventDefault();
-  addToCart(btn.dataset.name, btn.dataset.steel, Number(btn.dataset.price || 0), btn.dataset.img, btn.dataset.url);
+  addToCart(btn.dataset.name, btn.dataset.steel, Number(btn.dataset.price || 0), btn.dataset.img, btn.dataset.url, btn.dataset.id);
 });
 
 function syncHS(){
@@ -2411,12 +2411,21 @@ updatePhonePlaceholder();
 
 /* ─── GA4 EVENT TRACKING ─── */
 function trackAddToCart(product, quantity) {
-  if (typeof gtag === 'undefined') return;
-  gtag('event', 'add_to_cart', {
-    currency: 'USD',
-    value: product.price * quantity,
-    items: [{ item_id: product.id, item_name: product.name, item_category: product.category, price: product.price, quantity }]
-  });
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'add_to_cart', {
+      currency: 'USD',
+      value: product.price * quantity,
+      items: [{ item_id: product.id, item_name: product.name, item_category: product.category, price: product.price, quantity }]
+    });
+  }
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'AddToCart', {
+      content_ids: [String(product.id)],
+      content_type: 'product',
+      value: product.price * quantity,
+      currency: 'USD'
+    });
+  }
 }
 
 function trackCommissionSubmit() {
